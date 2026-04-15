@@ -1,0 +1,77 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "训练",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/stats/stats",
+      "style": {
+        "navigationBarTitleText": "数据",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/coach/coach",
+      "style": {
+        "navigationBarTitleText": "助手",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "WaveTrainer",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "backgroundColor": "#0f0f23",
+    "app-plus": {
+      "background": "#0f0f23"
+    }
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#4fc3f7",
+    "borderStyle": "black",
+    "backgroundColor": "#1a1a2e",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "训练",
+        "iconPath": "static/tab-train.png",
+        "selectedIconPath": "static/tab-train-active.png"
+      },
+      {
+        "pagePath": "pages/stats/stats",
+        "text": "数据",
+        "iconPath": "static/tab-stats.png",
+        "selectedIconPath": "static/tab-stats-active.png"
+      },
+      {
+        "pagePath": "pages/coach/coach",
+        "text": "助手",
+        "iconPath": "static/tab-coach.png",
+        "selectedIconPath": "static/tab-coach-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "static/tab-profile.png",
+        "selectedIconPath": "static/tab-profile-active.png"
+      }
+    ]
+  }
+}
