@@ -17,7 +17,7 @@
       <template v-else>
         <!-- 今日计划卡片 -->
         <view class="card plan-card" v-if="trainingStore.todayPlan">
-          <view class="plan-header">
+          <view class="plan-header" @longpress="onLongPressHeader">
             <view class="plan-title">
               <text class="phase-tag" :style="{ background: phaseColor }">
                 {{ trainingStore.currentIntensityLabel }}
@@ -282,6 +282,9 @@
         </view>
       </view>
     </view>
+
+    <!-- 开发者调试面板 -->
+    <DebugPanel :visible="showDebugPanel" @close="showDebugPanel = false" />
   </view>
 </template>
 
@@ -297,6 +300,7 @@ import { RPE_CONFIG } from '../../core/constants/config'
 import { formatVolume, formatDate } from '../../utils/format'
 import { MUSCLE_GROUP_NAMES } from '../../core/types/exercise'
 import type { TrainingSet } from '../../core/types/training'
+import DebugPanel from '../../components/debug-panel/debug-panel.vue'
 
 const trainingStore = useTrainingStore()
 const userStore = useUserStore()
@@ -584,6 +588,12 @@ function focusRPE() { /* uni-app input focus */ }
 
 // 自定义计划
 const isCustomPlan = ref(false)
+const showDebugPanel = ref(false)
+
+// 长按标题区域打开调试面板
+function onLongPressHeader() {
+  showDebugPanel.value = true
+}
 const insertAtIndex = ref(-1) // -1 表示追加到末尾
 
 // 在指定位置后插入动作
