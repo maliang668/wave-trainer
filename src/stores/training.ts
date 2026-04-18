@@ -123,6 +123,31 @@ export const useTrainingStore = defineStore('training', () => {
         exerciseMaxMap.set(id, (max as any).estimated1RM)
       }
 
+      // 为没有e1RM数据的动作设置默认重量
+      const defaultWeights: Record<string, number> = {
+        'bench_press': 40,
+        'incline_bench_press': 30,
+        'dumbbell_bench_press': 20,
+        'barbell_row': 40,
+        'overhead_press': 30,
+        'barbell_squat': 50,
+        'deadlift': 60,
+        'barbell_curl': 15,
+        'tricep_pushdown': 20,
+        'lateral_raise': 10,
+        'lat_pulldown': 35,
+        'leg_press': 60,
+        'leg_extension': 25,
+        'leg_curl': 25,
+        'calf_raise': 30,
+      }
+      // 为没有记录的动作设置默认重量
+      for (const [id, weight] of Object.entries(defaultWeights)) {
+        if (!exerciseMaxMap.has(id)) {
+          exerciseMaxMap.set(id, weight)
+        }
+      }
+
       // 获取动作库数据
       const exerciseStore = useExerciseStore()
       const exerciseData: Exercise[] = exerciseStore.exercises
@@ -154,6 +179,68 @@ export const useTrainingStore = defineStore('training', () => {
     } catch (e) {
       console.error('生成今日计划失败', e)
       currentPlan.value = null
+    }
+  }
+
+  // 更新训练日的动作列表（用户自定义选择后调用）
+  function updateDayExercises(exercises: any[]) {
+    if (!currentPlan.value) return
+
+    try {
+      const info = getCycleInfo(planStartDate.value, formatDate(new Date()))
+      const userStore = getUserStore()
+      const exerciseStore = useExerciseStore()
+
+      // 获取用户动作最大值
+      const exerciseMaxMap = new Map<string, number>()
+      for (const [id, max] of Object.entries(userStore.exerciseMaxes)) {
+        exerciseMaxMap.set(id, (max as any).estimated1RM)
+      }
+
+      // 为没有e1RM数据的动作设置默认重量
+      const defaultWeights: Record<string, number> = {
+        'bench_press': 40,
+        'incline_bench_press': 30,
+        'dumbbell_bench_press': 20,
+        'barbell_row': 40,
+        'overhead_press': 30,
+        'barbell_squat': 50,
+        'deadlift': 60,
+        'barbell_curl': 15,
+        'tricep_pushdown': 20,
+        'lateral_raise': 10,
+        'lat_pulldown': 35,
+        'leg_press': 60,
+        'leg_extension': 25,
+        'leg_curl': 25,
+        'calf_raise': 30,
+      }
+      for (const [id, weight] of Object.entries(defaultWeights)) {
+        if (!exerciseMaxMap.has(id)) {
+          exerciseMaxMap.set(id, weight)
+        }
+      }
+
+      // 用新的动作列表构建 dayConfig
+      const dayConfig: TrainingDayConfig = {
+        dayLabel: '训练日',
+        dayType: currentPlan.value.dayConfig.dayType,
+        exercises,
+      }
+
+      // 重新生成计划
+      const plan = generateDailyPlan(
+        dayConfig,
+        exerciseStore.exercises,
+        exerciseMaxMap,
+        formatDate(new Date()),
+        info.macroCycle,
+        info.microWeek,
+        userStore.barWeight
+      )
+      currentPlan.value = plan
+    } catch (e) {
+      console.error('更新训练动作失败', e)
     }
   }
 
@@ -351,6 +438,7 @@ export const useTrainingStore = defineStore('training', () => {
     loadTrainingLogs,
     setPlanStartDate,
     generateTodayPlan,
+    updateDayExercises,
     startTraining,
     recordSet,
     finishTraining,

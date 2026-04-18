@@ -29,6 +29,14 @@
       <!-- 动作列表 -->
       <view v-if="trainingStore.todayPlan" class="exercise-list">
         <view class="section-title">今日训练</view>
+        <view class="plan-actions">
+          <view class="btn-secondary btn-sm" @tap="openExercisePicker">
+            + 添加/替换动作
+          </view>
+          <view class="btn-secondary btn-sm" @tap="resetToDefaultPlan" v-if="isCustomPlan">
+            恢复默认
+          </view>
+        </view>
         <view
           v-for="(ex, index) in trainingStore.todayPlan.exercises"
           :key="ex.exerciseId"
@@ -469,6 +477,58 @@ function finishTraining() {
 function focusReps() { /* uni-app input focus */ }
 function focusRPE() { /* uni-app input focus */ }
 
+// 自定义计划
+const isCustomPlan = ref(false)
+const customExerciseIds = ref<string[]>([])
+
+// 打开动作选择器
+function openExercisePicker() {
+  // 将当前动作ID列表传递给选择器页面
+  const currentIds = trainingStore.todayPlan
+    ? trainingStore.todayPlan.exercises.map(ex => ex.exerciseId)
+    : []
+  customExerciseIds.value = currentIds
+  uni.navigateTo({ url: '/pages/exercise-picker/exercise-picker' })
+}
+
+// 动作选择完成回调（供选择器页面调用）
+function onExercisesSelected(ids: string[]) {
+  customExerciseIds.value = ids
+  isCustomPlan.value = true
+  rebuildPlanWithExercises(ids)
+}
+
+// 用选定的动作重建训练计划
+function rebuildPlanWithExercises(exerciseIds: string[]) {
+  if (exerciseIds.length === 0) return
+
+  const exerciseStoreLocal = useExerciseStore()
+  const userStoreLocal = useUserStore()
+
+  // 构建新的训练日配置
+  const exercises = exerciseIds.map(id => {
+    const ex = exerciseStoreLocal.getExercise(id)
+    const isCompound = ex?.category === 'compound'
+    return {
+      exerciseId: id,
+      sets: isCompound ? 4 : 3,
+      repsRange: isCompound ? [4, 8] : [8, 12] as [number, number],
+      rpeTarget: isCompound ? 7.5 : 7,
+      percent1RM: isCompound ? 0.75 : 0.65,
+    }
+  })
+
+  // 更新 store 中的计划
+  trainingStore.updateDayExercises(exercises)
+}
+
+// 恢复默认计划
+function resetToDefaultPlan() {
+  isCustomPlan.value = false
+  customExerciseIds.value = []
+  trainingStore.generateTodayPlan()
+}
+
 // 生命周期
 onShow(() => {
   trainingStore.generateTodayPlan()
@@ -539,6 +599,16 @@ onShow(() => {
   color: #e0e0e0;
   margin: 32rpx 0 16rpx;
   padding-left: 8rpx;
+}
+.plan-actions {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+.btn-sm {
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  border-radius: 8rpx;
 }
 .exercise-card {
   border-left: 6rpx solid #4fc3f7;
