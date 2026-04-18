@@ -198,13 +198,23 @@ function saveBodyData() {
 
 // 设置操作
 function toggleRPEMode() {
+  if (!userStore.profile) {
+    uni.showToast({ title: '用户数据加载中，请稍后', icon: 'none' })
+    return
+  }
   const newMode = userStore.rpeMode === 'beginner' ? 'advanced' : 'beginner'
   userStore.updatePreferences({ rpeMode: newMode })
+  uni.showToast({ title: newMode === 'beginner' ? '已切换为新手模式' : '已切换为进阶模式', icon: 'none' })
 }
 
 function toggleUnit() {
+  if (!userStore.profile) {
+    uni.showToast({ title: '用户数据加载中，请稍后', icon: 'none' })
+    return
+  }
   const newUnit = userStore.weightUnit === 'kg' ? 'lb' : 'kg'
   userStore.updatePreferences({ weightUnit: newUnit })
+  uni.showToast({ title: newUnit === 'kg' ? '已切换为公斤' : '已切换为磅', icon: 'none' })
 }
 
 function updateBarWeight(e: any) {

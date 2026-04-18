@@ -131,8 +131,9 @@
                 <view class="weight-btn" @tap="adjustWeight(-2.5)">-2.5</view>
                 <input
                   type="digit"
-                  v-model="currentWeight"
+                  :value="currentWeight"
                   class="weight-field"
+                  @input="onWeightInput"
                   @confirm="focusReps"
                 />
                 <view class="weight-btn" @tap="adjustWeight(2.5)">+2.5</view>
@@ -143,8 +144,9 @@
               <text class="input-label">次数</text>
               <input
                 type="number"
-                v-model="currentReps"
+                :value="currentReps"
                 class="reps-field"
+                @input="onRepsInput"
                 @confirm="focusRPE"
               />
             </view>
@@ -315,6 +317,16 @@ function startTraining() {
 function adjustWeight(delta: number) {
   const w = parseFloat(currentWeight.value) || 0
   currentWeight.value = String(Math.max(0, w + delta))
+}
+
+// 手动输入重量
+function onWeightInput(e: any) {
+  currentWeight.value = e.detail.value
+}
+
+// 手动输入次数
+function onRepsInput(e: any) {
+  currentReps.value = e.detail.value
 }
 
 // 新手RPE选择
