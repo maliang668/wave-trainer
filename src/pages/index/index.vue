@@ -255,7 +255,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useTrainingStore } from '../../stores/training'
 import { useUserStore } from '../../stores/user'
@@ -559,6 +559,16 @@ function resetToDefaultPlan() {
 // 生命周期
 onShow(() => {
   trainingStore.generateTodayPlan()
+})
+
+// 监听动作选择器返回的事件
+uni.$on('exercisesSelected', (ids: string[]) => {
+  onExercisesSelected(ids)
+})
+
+// 组件卸载时移除监听
+onUnmounted(() => {
+  uni.$off('exercisesSelected')
 })
 </script>
 

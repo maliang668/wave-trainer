@@ -145,12 +145,8 @@ function toggleExercise(ex: Exercise) {
 
 // 确认选择
 function confirmSelection() {
-  // 通过事件通信将选择结果传回上一页
-  const pages = getCurrentPages()
-  const prevPage = pages[pages.length - 2] as any
-  if (prevPage && prevPage.$vm && prevPage.$vm.onExercisesSelected) {
-    prevPage.$vm.onExercisesSelected(selectedIds.value)
-  }
+  // 通过 uni 事件总线将选择结果传回上一页
+  uni.$emit('exercisesSelected', selectedIds.value)
   uni.navigateBack()
 }
 </script>

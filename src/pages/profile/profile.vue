@@ -11,16 +11,120 @@
       </view>
     </view>
 
-    <!-- 身体数据 -->
+    <!-- 身体基础数据 -->
     <view class="card">
-      <view class="section-title">📏 身体数据</view>
+      <view class="section-title">📏 身体基础数据</view>
       <view class="body-data-form">
+        <!-- 性别 -->
+        <view class="form-row">
+          <text class="form-label">性别</text>
+          <view class="gender-group">
+            <view
+              class="gender-tag"
+              :class="{ active: gender === 'male' }"
+              @tap="gender = 'male'"
+            >
+              <text>♂ 男</text>
+            </view>
+            <view
+              class="gender-tag"
+              :class="{ active: gender === 'female' }"
+              @tap="gender = 'female'"
+            >
+              <text>♀ 女</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 年龄 -->
+        <view class="form-row">
+          <text class="form-label">年龄</text>
+          <view class="form-input-group">
+            <input
+              type="number"
+              :value="age"
+              class="form-input"
+              placeholder="输入年龄"
+              @input="onAgeInput"
+            />
+            <text class="form-unit">岁</text>
+          </view>
+        </view>
+
+        <!-- 身高 -->
+        <view class="form-row">
+          <text class="form-label">身高</text>
+          <view class="form-input-group">
+            <input
+              type="digit"
+              :value="height"
+              class="form-input"
+              placeholder="输入身高"
+              @input="onHeightInput"
+            />
+            <text class="form-unit">cm</text>
+          </view>
+        </view>
+
+        <!-- 体重 -->
         <view class="form-row">
           <text class="form-label">体重</text>
           <view class="form-input-group">
             <input
               type="digit"
-              v-model="bodyWeight"
+              :value="weight"
+              class="form-input"
+              placeholder="输入体重"
+              @input="onWeightInput"
+            />
+            <text class="form-unit">kg</text>
+          </view>
+        </view>
+
+        <!-- 体脂率 -->
+        <view class="form-row">
+          <text class="form-label">体脂率</text>
+          <view class="form-input-group">
+            <input
+              type="digit"
+              :value="bodyFat"
+              class="form-input"
+              placeholder="选填"
+              @input="onBodyFatInput"
+            />
+            <text class="form-unit">%</text>
+          </view>
+        </view>
+
+        <!-- 经期状态（仅女性显示） -->
+        <view class="form-row" v-if="gender === 'female'">
+          <text class="form-label">经期状态</text>
+          <view class="setting-value">
+            <switch
+              :checked="isMenstruating"
+              color="#ef5350"
+              @change="onMenstruationChange"
+            />
+            <text class="form-unit">{{ isMenstruating ? '经期中' : '正常' }}</text>
+          </view>
+        </view>
+
+        <view class="btn-primary save-body-btn" @tap="saveProfile">
+          保存基础数据
+        </view>
+      </view>
+    </view>
+
+    <!-- 身体数据记录 -->
+    <view class="card">
+      <view class="section-title">📊 体重记录</view>
+      <view class="body-data-form">
+        <view class="form-row">
+          <text class="form-label">今日体重</text>
+          <view class="form-input-group">
+            <input
+              type="digit"
+              v-model="recordWeight"
               class="form-input"
               placeholder="输入体重"
             />
@@ -28,11 +132,11 @@
           </view>
         </view>
         <view class="form-row">
-          <text class="form-label">体脂率</text>
+          <text class="form-label">今日体脂</text>
           <view class="form-input-group">
             <input
               type="digit"
-              v-model="bodyFat"
+              v-model="recordBodyFat"
               class="form-input"
               placeholder="选填"
             />
@@ -40,7 +144,7 @@
           </view>
         </view>
         <view class="btn-primary save-body-btn" @tap="saveBodyData">
-          记录身体数据
+          记录今日数据
         </view>
       </view>
 
@@ -101,7 +205,7 @@
         </view>
       </view>
 
-      <view class="setting-row" @tap="toggleWarmup">
+      <view class="setting-row">
         <text class="setting-label">自动计算热身组</text>
         <switch
           :checked="userStore.profile?.preferences.enableWarmupCalc ?? true"
@@ -162,9 +266,31 @@ import { formatDate } from '../../utils/format'
 const userStore = useUserStore()
 const trainingStore = useTrainingStore()
 
-// 身体数据输入
-const bodyWeight = ref('')
+// 初始化身体基础数据（从 profile 加载）
+function initBodyProfile() {
+  if (userStore.profile) {
+    gender.value = userStore.profile.profile.gender || 'male'
+    age.value = userStore.profile.profile.age ? String(userStore.profile.profile.age) : ''
+    height.value = userStore.profile.profile.height ? String(userStore.profile.profile.height) : ''
+    weight.value = userStore.profile.profile.weight ? String(userStore.profile.profile.weight) : ''
+    bodyFat.value = userStore.profile.profile.bodyFat ? String(userStore.profile.profile.bodyFat) : ''
+    isMenstruating.value = userStore.profile.profile.isMenstruating || false
+  }
+}
+// 延迟初始化，等待 store 加载完成
+setTimeout(initBodyProfile, 500)
+
+// 身体基础数据
+const gender = ref<'male' | 'female' | 'other'>('male')
+const age = ref('')
+const height = ref('')
+const weight = ref('')
 const bodyFat = ref('')
+const isMenstruating = ref(false)
+
+// 身体记录输入
+const recordWeight = ref('')
+const recordBodyFat = ref('')
 
 // 计算属性
 const avatarText = computed(() => {
@@ -177,29 +303,60 @@ const weekInCycle = computed(() => {
   return ((week - 1) % 4) + 1
 })
 
-// 保存身体数据
+// 输入处理
+function onAgeInput(e: any) { age.value = e.detail.value }
+function onHeightInput(e: any) { height.value = e.detail.value }
+function onWeightInput(e: any) { weight.value = e.detail.value }
+function onBodyFatInput(e: any) { bodyFat.value = e.detail.value }
+function onMenstruationChange(e: any) { isMenstruating.value = e.detail.value }
+
+// 保存基础数据
+function saveProfile() {
+  if (!userStore.profile) {
+    userStore.init().then(() => saveProfile())
+    return
+  }
+
+  userStore.updateProfile({
+    profile: {
+      ...userStore.profile.profile,
+      gender: gender.value,
+      age: parseInt(age.value) || undefined,
+      height: parseFloat(height.value) || userStore.profile.profile.height,
+      weight: parseFloat(weight.value) || userStore.profile.profile.weight,
+      bodyFat: parseFloat(bodyFat.value) || undefined,
+      isMenstruating: isMenstruating.value,
+    },
+  })
+  uni.showToast({ title: '已保存', icon: 'success' })
+}
+
+// 保存身体数据记录
 function saveBodyData() {
-  const weight = parseFloat(bodyWeight.value)
-  if (!weight || weight <= 0) {
+  const w = parseFloat(recordWeight.value)
+  if (!w || w <= 0) {
     uni.showToast({ title: '请输入有效体重', icon: 'none' })
     return
   }
 
   userStore.addBodyMetric({
     date: formatDate(new Date()),
-    weight,
-    bodyFat: parseFloat(bodyFat.value) || undefined,
+    weight: w,
+    bodyFat: parseFloat(recordBodyFat.value) || undefined,
   })
 
-  bodyWeight.value = ''
-  bodyFat.value = ''
+  recordWeight.value = ''
+  recordBodyFat.value = ''
   uni.showToast({ title: '已记录', icon: 'success' })
 }
 
 // 设置操作
 function toggleRPEMode() {
   if (!userStore.profile) {
-    uni.showToast({ title: '用户数据加载中，请稍后', icon: 'none' })
+    // 尝试重新初始化
+    userStore.init().then(() => {
+      toggleRPEMode()
+    })
     return
   }
   const newMode = userStore.rpeMode === 'beginner' ? 'advanced' : 'beginner'
@@ -209,7 +366,9 @@ function toggleRPEMode() {
 
 function toggleUnit() {
   if (!userStore.profile) {
-    uni.showToast({ title: '用户数据加载中，请稍后', icon: 'none' })
+    userStore.init().then(() => {
+      toggleUnit()
+    })
     return
   }
   const newUnit = userStore.weightUnit === 'kg' ? 'lb' : 'kg'
@@ -366,4 +525,22 @@ function confirmClearData() {
 .app-name { display: block; font-size: 36rpx; font-weight: 700; color: #4fc3f7; }
 .app-version { display: block; font-size: 24rpx; color: #666; margin-top: 4rpx; }
 .app-desc { display: block; font-size: 24rpx; color: #888; margin-top: 8rpx; }
+
+/* 性别选择 */
+.gender-group {
+  display: flex;
+  gap: 12rpx;
+}
+.gender-tag {
+  padding: 10rpx 28rpx;
+  border-radius: 20rpx;
+  background: #2a2a4a;
+  font-size: 26rpx;
+  color: #888;
+}
+.gender-tag.active {
+  background: rgba(79, 195, 247, 0.2);
+  color: #4fc3f7;
+  font-weight: 600;
+}
 </style>

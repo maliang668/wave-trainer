@@ -15,6 +15,9 @@ export interface BodyProfile {
   birthday: string
   gender: 'male' | 'female' | 'other'
   barWeight: number // 空杆重量，默认20kg
+  age?: number // 年龄（可选，也可从birthday推算）
+  bodyFat?: number // 体脂率
+  isMenstruating?: boolean // 是否在经期（仅女性）
 }
 
 export interface UserPreferences {
