@@ -76,13 +76,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { SPLIT_TEMPLATES } from '../../core/constants/config'
+import { ref, computed } from 'vue'
+import { SPLIT_TEMPLATES, CUSTOM_TEMPLATE_STORAGE_KEY } from '../../core/constants/config'
 import { useTrainingStore } from '../../stores/training'
+import type { SplitTemplate } from '../../core/types/training'
 
 const trainingStore = useTrainingStore()
-const templates = SPLIT_TEMPLATES
 const selectedId = ref(trainingStore.selectedTemplateId || '')
+
+// 合并预设模板和自定义方案
+const templates = computed(() => {
+  const list = [...SPLIT_TEMPLATES]
+  try {
+    const saved = uni.getStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY)
+    if (saved) {
+      const custom = JSON.parse(saved) as SplitTemplate
+      // 避免重复添加
+      if (!list.find(t => t.id === custom.id)) {
+        list.push(custom)
+      }
+    }
+  } catch { /* ignore */ }
+  return list
+})
 
 const levelLabels: Record<string, string> = {
   beginner: '新手',
