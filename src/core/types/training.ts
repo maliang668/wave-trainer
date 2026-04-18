@@ -62,7 +62,7 @@ export interface PlanExercise {
 // 训练日配置
 export interface TrainingDayConfig {
   dayLabel: string
-  dayType: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'rest'
+  dayType: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'shoulders' | 'arms' | 'rest'
   exercises: PlanExercise[]
 }
 
@@ -75,13 +75,14 @@ export interface SplitTemplate {
   daysPerWeek: number
   cycleDays: number  // 循环总天数（如5天：胸/背/休/腿/休）
   days: SplitDayConfig[]
+  isCustom?: boolean  // 用户自定义模板
 }
 
 // 分化日配置
 export interface SplitDayConfig {
   dayIndex: number  // 在循环中的位置（0-based）
   label: string     // 如 '胸部日', '背部日', '休息'
-  type: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'rest'
+  type: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'shoulders' | 'arms' | 'rest'
   exercises: PlanExercise[]
   description?: string  // 如 '胸大肌、三角肌前束、肱三头肌'
 }
@@ -100,7 +101,7 @@ export interface TrainingPlan {
   createdAt: string
 }
 
-export type PlanType = 'full_body_beginner' | 'upper_lower' | 'push_pull_legs' | 'chest_back_legs' | 'custom'
+export type PlanType = 'full_body_beginner' | 'upper_lower' | 'push_pull_legs' | 'custom'
 
 // 每日生成的训练计划
 export interface DailyPlan {

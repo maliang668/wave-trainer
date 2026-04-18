@@ -289,60 +289,102 @@ export const SPLIT_TEMPLATES: SplitTemplate[] = [
       { dayIndex: 6, label: '休息', type: 'rest', exercises: [] },
     ],
   },
-
-  // 4. 胸背腿5天循环（用户个人偏好）
-  {
-    id: 'chest_back_legs',
-    name: '胸背腿五天循环',
-    description: '5天一循环：胸部→背部→休息→腿部→休息。每个肌群训练容量更大，适合中高级训练者。结合DUP强度波动效果更佳。',
-    level: 'advanced',
-    daysPerWeek: 3,
-    cycleDays: 5, // 5天一循环
-    days: [
-      {
-        dayIndex: 0,
-        label: '胸部日',
-        type: 'chest',
-        description: '胸大肌、三角肌前束、肱三头肌',
-        exercises: [
-          { exerciseId: 'bench_press', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
-          { exerciseId: 'incline_bench_press', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
-          { exerciseId: 'dumbbell_fly', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
-          { exerciseId: 'cable_crossover', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.55 },
-          { exerciseId: 'tricep_pushdown', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
-        ],
-      },
-      {
-        dayIndex: 1,
-        label: '背部日',
-        type: 'back',
-        description: '背阔肌、斜方肌、肱二头肌',
-        exercises: [
-          { exerciseId: 'barbell_row', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
-          { exerciseId: 'lat_pulldown', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
-          { exerciseId: 'cable_row', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
-          { exerciseId: 'face_pull', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.50 },
-          { exerciseId: 'barbell_curl', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
-        ],
-      },
-      { dayIndex: 2, label: '休息', type: 'rest', exercises: [] },
-      {
-        dayIndex: 3,
-        label: '腿部日',
-        type: 'legs',
-        description: '股四头肌、腘绳肌、臀肌、小腿',
-        exercises: [
-          { exerciseId: 'squat', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
-          { exerciseId: 'romanian_deadlift', sets: 4, repsRange: [8, 10], rpeTarget: 7.5, percent1RM: 0.70 },
-          { exerciseId: 'leg_press', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.70 },
-          { exerciseId: 'hip_thrust', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.70 },
-          { exerciseId: 'calf_raise', sets: 4, repsRange: [12, 20], rpeTarget: 7, percent1RM: 0.55 },
-        ],
-      },
-      { dayIndex: 4, label: '休息', type: 'rest', exercises: [] },
-    ],
-  },
 ]
+
+// ===== 自定义模板配置 =====
+
+// 可用的训练日类型选项
+export const DAY_TYPE_OPTIONS = [
+  { value: 'chest', label: '胸部', icon: '🫁', description: '胸大肌、三角肌前束' },
+  { value: 'back', label: '背部', icon: '🔙', description: '背阔肌、斜方肌' },
+  { value: 'legs', label: '腿部', icon: '🦵', description: '股四头肌、腘绳肌、臀肌' },
+  { value: 'shoulders', label: '肩部', icon: '💪', description: '三角肌前中后束' },
+  { value: 'arms', label: '手臂', icon: '💪', description: '肱二头肌、肱三头肌' },
+  { value: 'upper', label: '上肢', icon: '💪', description: '胸部+背部+肩部+手臂' },
+  { value: 'lower', label: '下肢', icon: '🦵', description: '股四头肌+腘绳肌+臀肌' },
+  { value: 'push', label: '推', icon: '🚀', description: '胸部+肩部+肱三头肌' },
+  { value: 'pull', label: '拉', icon: '🔙', description: '背部+肱二头肌' },
+  { value: 'full_body', label: '全身', icon: '🏋️', description: '全身肌群' },
+  { value: 'rest', label: '休息', icon: '😴', description: '休息恢复' },
+] as const
+
+// 每种训练日类型的默认动作
+export const DAY_TYPE_DEFAULT_EXERCISES: Record<string, Array<{exerciseId: string; sets: number; repsRange: [number, number]; rpeTarget: number; percent1RM: number}>> = {
+  chest: [
+    { exerciseId: 'bench_press', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'incline_bench_press', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
+    { exerciseId: 'dumbbell_fly', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
+    { exerciseId: 'cable_crossover', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.55 },
+    { exerciseId: 'tricep_pushdown', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  back: [
+    { exerciseId: 'barbell_row', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'lat_pulldown', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
+    { exerciseId: 'cable_row', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
+    { exerciseId: 'face_pull', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.50 },
+    { exerciseId: 'barbell_curl', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  legs: [
+    { exerciseId: 'squat', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'romanian_deadlift', sets: 4, repsRange: [8, 10], rpeTarget: 7.5, percent1RM: 0.70 },
+    { exerciseId: 'leg_press', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.70 },
+    { exerciseId: 'hip_thrust', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.70 },
+    { exerciseId: 'calf_raise', sets: 4, repsRange: [12, 20], rpeTarget: 7, percent1RM: 0.55 },
+  ],
+  shoulders: [
+    { exerciseId: 'overhead_press', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'dumbbell_shoulder_press', sets: 3, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
+    { exerciseId: 'lateral_raise', sets: 4, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.55 },
+    { exerciseId: 'face_pull', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.50 },
+    { exerciseId: 'reverse_fly', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.55 },
+  ],
+  arms: [
+    { exerciseId: 'barbell_curl', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.65 },
+    { exerciseId: 'dumbbell_curl', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
+    { exerciseId: 'hammer_curl', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
+    { exerciseId: 'tricep_pushdown', sets: 4, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.65 },
+    { exerciseId: 'overhead_tricep_extension', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  upper: [
+    { exerciseId: 'bench_press', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'barbell_row', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'overhead_press', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'barbell_curl', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
+    { exerciseId: 'tricep_pushdown', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
+  ],
+  lower: [
+    { exerciseId: 'squat', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'romanian_deadlift', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'leg_press', sets: 3, repsRange: [8, 10], rpeTarget: 7, percent1RM: 0.70 },
+    { exerciseId: 'leg_curl', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
+    { exerciseId: 'calf_raise', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  push: [
+    { exerciseId: 'bench_press', sets: 4, repsRange: [5, 8], rpeTarget: 7.5, percent1RM: 0.80 },
+    { exerciseId: 'incline_bench_press', sets: 3, repsRange: [8, 12], rpeTarget: 7.5, percent1RM: 0.70 },
+    { exerciseId: 'overhead_press', sets: 3, repsRange: [6, 10], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'lateral_raise', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.55 },
+    { exerciseId: 'tricep_pushdown', sets: 3, repsRange: [10, 15], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  pull: [
+    { exerciseId: 'deadlift', sets: 4, repsRange: [4, 6], rpeTarget: 8, percent1RM: 0.85 },
+    { exerciseId: 'barbell_row', sets: 4, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'lat_pulldown', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.70 },
+    { exerciseId: 'face_pull', sets: 3, repsRange: [12, 15], rpeTarget: 7, percent1RM: 0.50 },
+    { exerciseId: 'barbell_curl', sets: 3, repsRange: [10, 12], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  full_body: [
+    { exerciseId: 'squat', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'bench_press', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'barbell_row', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
+    { exerciseId: 'overhead_press', sets: 2, repsRange: [8, 10], rpeTarget: 7, percent1RM: 0.70 },
+    { exerciseId: 'barbell_curl', sets: 2, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.60 },
+  ],
+  rest: [],
+}
+
+// 自定义模板本地存储 key
+export const CUSTOM_TEMPLATE_STORAGE_KEY = 'wt_custom_template'
 
 // 默认重量（新用户无e1RM数据时使用）
 export const DEFAULT_WEIGHTS: Record<string, number> = {

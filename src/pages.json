@@ -47,6 +47,14 @@
         "navigationBarBackgroundColor": "#1a1a2e",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/custom-split/custom-split",
+      "style": {
+        "navigationBarTitleText": "自定义方案",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {

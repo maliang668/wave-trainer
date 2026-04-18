@@ -54,6 +54,18 @@
       </view>
     </view>
 
+    <!-- 自定义方案入口 -->
+    <view class="card custom-entry" @tap="goToCustom">
+      <view class="custom-entry-main">
+        <text class="custom-entry-icon">✨</text>
+        <view class="custom-entry-info">
+          <text class="custom-entry-title">自定义方案</text>
+          <text class="custom-entry-desc">根据自己的需求创建个性化训练分化</text>
+        </view>
+      </view>
+      <text class="custom-entry-arrow">›</text>
+    </view>
+
     <!-- 确认按钮 -->
     <view class="confirm-wrapper" v-if="selectedId">
       <view class="btn-primary confirm-btn" @tap="confirmSelection">
@@ -89,6 +101,10 @@ function confirmSelection() {
   setTimeout(() => {
     uni.navigateBack()
   }, 500)
+}
+
+function goToCustom() {
+  uni.navigateTo({ url: '/pages/custom-split/custom-split' })
 }
 </script>
 
@@ -254,5 +270,44 @@ function confirmSelection() {
   font-size: 34rpx;
   border-radius: 16rpx;
   text-align: center;
+}
+
+/* 自定义方案入口 */
+.custom-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  border: 2rpx dashed #3a3a5a;
+  background: rgba(79, 195, 247, 0.03);
+}
+.custom-entry:active {
+  background: rgba(79, 195, 247, 0.08);
+}
+.custom-entry-main {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.custom-entry-icon { font-size: 40rpx; }
+.custom-entry-info {
+  flex: 1;
+}
+.custom-entry-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+.custom-entry-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 4rpx;
+}
+.custom-entry-arrow {
+  font-size: 36rpx;
+  color: #666;
+  font-weight: 300;
 }
 </style>

@@ -13,7 +13,7 @@ import { assessFatigue } from '../core/algorithms/fatigue-assessor'
 import { formatDate, daysBetween } from '../utils/format'
 import { useExerciseStore } from './exercise'
 import type { Exercise } from '../core/types/exercise'
-import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS } from '../core/constants/config'
+import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS, CUSTOM_TEMPLATE_STORAGE_KEY } from '../core/constants/config'
 
 // 延迟获取 userStore，避免循环依赖
 function getUserStore() {
@@ -53,7 +53,14 @@ export const useTrainingStore = defineStore('training', () => {
   // 当前选中的模板
   const selectedTemplate = computed((): SplitTemplate | undefined => {
     if (!selectedTemplateId.value) return undefined
-    return getSplitTemplate(selectedTemplateId.value)
+    // 先从预设模板查找
+    const preset = getSplitTemplate(selectedTemplateId.value)
+    if (preset) return preset
+    // 再从自定义模板查找
+    if (selectedTemplateId.value === 'custom') {
+      return loadCustomTemplate()
+    }
+    return undefined
   })
 
   const hasSelectedTemplate = computed(() => !!selectedTemplate.value)
@@ -134,6 +141,17 @@ export const useTrainingStore = defineStore('training', () => {
         selectedTemplateId.value = data
       }
     } catch { /* ignore */ }
+  }
+
+  // 加载自定义模板
+  function loadCustomTemplate(): SplitTemplate | undefined {
+    try {
+      const saved = uni.getStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY)
+      if (saved) {
+        return JSON.parse(saved) as SplitTemplate
+      }
+    } catch { /* ignore */ }
+    return undefined
   }
 
   // 设置计划开始日期
