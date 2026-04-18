@@ -47,8 +47,13 @@
           <text class="rest-sub" v-if="trainingStore.selectedTemplate">
             当前方案：{{ trainingStore.selectedTemplate.name }}
           </text>
-          <view class="btn-secondary rest-switch-btn" @tap="goToSplitPicker" style="margin-top: 24rpx;">
-            切换方案
+          <view class="rest-actions">
+            <view class="btn-secondary rest-switch-btn" @tap="goToSplitPicker">
+              切换方案
+            </view>
+            <view class="btn-primary rest-train-btn" @tap="trainAnyway">
+              仍要训练
+            </view>
           </view>
         </view>
 
@@ -369,6 +374,32 @@ function getRPEColor(rpe: number): string {
 // 跳转到模板选择页
 function goToSplitPicker() {
   uni.navigateTo({ url: '/pages/split-picker/split-picker' })
+}
+
+// 休息日仍要训练：让用户选择训练日类型，临时生成计划
+function trainAnyway() {
+  const template = trainingStore.selectedTemplate
+  if (!template) {
+    goToSplitPicker()
+    return
+  }
+  // 获取模板中所有非休息日
+  const trainingDays = template.days.filter(d => d.type !== 'rest')
+  if (trainingDays.length === 0) return
+
+  // 如果只有一个训练日类型，直接用
+  if (trainingDays.length === 1) {
+    trainingStore.forceGeneratePlan(trainingDays[0])
+    return
+  }
+
+  // 多个训练日类型，让用户选择
+  uni.showActionSheet({
+    itemList: trainingDays.map(d => d.label),
+    success: (res) => {
+      trainingStore.forceGeneratePlan(trainingDays[res.tapIndex])
+    },
+  })
 }
 
 // 开始训练
@@ -736,11 +767,21 @@ onShow(() => {
 .rest-emoji { font-size: 80rpx; }
 .rest-text { display: block; font-size: 36rpx; font-weight: 600; margin-top: 16rpx; }
 .rest-sub { display: block; font-size: 26rpx; color: #888; margin-top: 8rpx; }
+.rest-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+  justify-content: center;
+}
 .rest-switch-btn {
-  display: inline-block;
-  padding: 12rpx 32rpx;
-  font-size: 24rpx;
-  border-radius: 8rpx;
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  border-radius: 12rpx;
+}
+.rest-train-btn {
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  border-radius: 12rpx;
 }
 
 /* 动作列表 */

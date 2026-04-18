@@ -228,8 +228,31 @@ export const useTrainingStore = defineStore('training', () => {
     // 选择模板后重置开始日期为今天
     planStartDate.value = formatDate(new Date())
     uni.setStorageSync('wt_plan_start_date', planStartDate.value)
+    // 如果今天是休息日，自动调整到下一个训练日
+    adjustStartDateToTrainingDay()
     // 立即生成今日计划
     generateTodayPlan()
+  }
+
+  // 调整开始日期，确保第一天是训练日而非休息日
+  function adjustStartDateToTrainingDay() {
+    const template = selectedTemplate.value
+    if (!template) return
+    const today = new Date(planStartDate.value)
+    // 检查最多往后推7天
+    for (let i = 0; i < 7; i++) {
+      const checkDate = new Date(today)
+      checkDate.setDate(today.getDate() + i)
+      const dateStr = formatDate(checkDate)
+      const { splitDay } = getDayInCycle(template, planStartDate.value, dateStr)
+      if (splitDay.type !== 'rest') {
+        if (i > 0) {
+          planStartDate.value = dateStr
+          uni.setStorageSync('wt_plan_start_date', dateStr)
+        }
+        return
+      }
+    }
   }
 
   // 生成今日训练计划
@@ -320,6 +343,54 @@ export const useTrainingStore = defineStore('training', () => {
       console.error('生成今日计划失败', e)
       currentPlan.value = null
     }
+  }
+
+  // 强制为指定训练日生成计划（休息日仍要训练时调用）
+  function forceGeneratePlan(splitDay: any) {
+    if (!selectedTemplate.value) return
+
+    const template = selectedTemplate.value
+    const userStore = getUserStore()
+    const exerciseStore = useExerciseStore()
+    const info = getCycleInfo(planStartDate.value, formatDate(new Date()))
+
+    const exerciseMaxMap = new Map<string, number>()
+    for (const [id, max] of Object.entries(userStore.exerciseMaxes)) {
+      exerciseMaxMap.set(id, (max as any).estimated1RM)
+    }
+    const userProfile = userStore.profile?.profile
+    if (userProfile && userProfile.weight > 0) {
+      const allIds = splitDay.exercises.map((e: any) => e.exerciseId)
+      const estimated = estimateAllInitial1RMs(allIds, userProfile)
+      for (const [id, e1rm] of estimated.entries()) {
+        if (!exerciseMaxMap.has(id)) exerciseMaxMap.set(id, e1rm)
+      }
+    }
+    for (const [id, weight] of Object.entries(DEFAULT_WEIGHTS)) {
+      if (!exerciseMaxMap.has(id)) exerciseMaxMap.set(id, weight)
+    }
+
+    const dayConfig: TrainingDayConfig = {
+      dayLabel: splitDay.label,
+      dayType: splitDay.type,
+      exercises: splitDay.exercises,
+    }
+
+    const isBeginner = template.level === 'beginner'
+    const plan = generateDailyPlan(
+      dayConfig,
+      exerciseStore.exercises,
+      exerciseMaxMap,
+      formatDate(new Date()),
+      info.macroCycle,
+      1,
+      isBeginner,
+      false,
+      userStore.barWeight,
+      template.id,
+      splitDay.label
+    )
+    currentPlan.value = plan
   }
 
   // 更新训练日的动作列表（用户自定义选择后调用）
@@ -590,6 +661,7 @@ export const useTrainingStore = defineStore('training', () => {
     setPlanStartDate,
     selectTemplate,
     generateTodayPlan,
+    forceGeneratePlan,
     updateDayExercises,
     startTraining,
     recordSet,
