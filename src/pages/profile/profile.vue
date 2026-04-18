@@ -258,7 +258,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useUserStore } from '../../stores/user'
 import { useTrainingStore } from '../../stores/training'
 import { formatDate } from '../../utils/format'
@@ -269,12 +269,14 @@ const trainingStore = useTrainingStore()
 // 初始化身体基础数据（从 profile 加载）
 function initBodyProfile() {
   if (userStore.profile) {
-    gender.value = userStore.profile.profile.gender || 'male'
-    age.value = userStore.profile.profile.age ? String(userStore.profile.profile.age) : ''
-    height.value = userStore.profile.profile.height ? String(userStore.profile.profile.height) : ''
-    weight.value = userStore.profile.profile.weight ? String(userStore.profile.profile.weight) : ''
-    bodyFat.value = userStore.profile.profile.bodyFat ? String(userStore.profile.profile.bodyFat) : ''
-    isMenstruating.value = userStore.profile.profile.isMenstruating || false
+    nextTick(() => {
+      gender.value = userStore.profile?.profile.gender || 'male'
+      age.value = userStore.profile?.profile.age ? String(userStore.profile.profile.age) : ''
+      height.value = userStore.profile?.profile.height ? String(userStore.profile.profile.height) : ''
+      weight.value = userStore.profile?.profile.weight ? String(userStore.profile.profile.weight) : ''
+      bodyFat.value = userStore.profile?.profile.bodyFat ? String(userStore.profile.profile.bodyFat) : ''
+      isMenstruating.value = userStore.profile?.profile.isMenstruating || false
+    })
   }
 }
 // 延迟初始化，等待 store 加载完成
@@ -328,7 +330,10 @@ function saveProfile() {
       isMenstruating: isMenstruating.value,
     },
   })
-  uni.showToast({ title: '已保存', icon: 'success' })
+  // 等待渲染层更新完成后再提示，避免 "Expected updated data" 错误
+  nextTick(() => {
+    uni.showToast({ title: '已保存', icon: 'success' })
+  })
 }
 
 // 保存身体数据记录
@@ -345,9 +350,11 @@ function saveBodyData() {
     bodyFat: parseFloat(recordBodyFat.value) || undefined,
   })
 
-  recordWeight.value = ''
-  recordBodyFat.value = ''
-  uni.showToast({ title: '已记录', icon: 'success' })
+  nextTick(() => {
+    recordWeight.value = ''
+    recordBodyFat.value = ''
+    uni.showToast({ title: '已记录', icon: 'success' })
+  })
 }
 
 // 设置操作
