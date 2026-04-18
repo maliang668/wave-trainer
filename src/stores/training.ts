@@ -14,6 +14,7 @@ import { formatDate, daysBetween } from '../utils/format'
 import { useExerciseStore } from './exercise'
 import type { Exercise } from '../core/types/exercise'
 import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS, CUSTOM_TEMPLATE_STORAGE_KEY } from '../core/constants/config'
+import { estimateAllInitial1RMs } from '../core/algorithms/body-estimator'
 
 // 延迟获取 userStore，避免循环依赖
 function getUserStore() {
@@ -208,7 +209,6 @@ export const useTrainingStore = defineStore('training', () => {
       const userProfile = userStore.profile?.profile
       if (userProfile && userProfile.weight > 0) {
         // 有身体数据：用公式估算
-        const { estimateAllInitial1RMs } = require('../core/algorithms/body-estimator')
         const allExerciseIds = dayConfig.exercises.map(e => e.exerciseId)
         const estimatedMaxes = estimateAllInitial1RMs(allExerciseIds, userProfile)
         for (const [id, e1rm] of estimatedMaxes.entries()) {
@@ -288,7 +288,6 @@ export const useTrainingStore = defineStore('training', () => {
       // 为没有e1RM数据的动作估算初始重量
       const userProfile = userStore.profile?.profile
       if (userProfile && userProfile.weight > 0) {
-        const { estimateAllInitial1RMs } = require('../core/algorithms/body-estimator')
         const allExerciseIds = exercises.map((e: any) => e.exerciseId)
         const estimatedMaxes = estimateAllInitial1RMs(allExerciseIds, userProfile)
         for (const [id, e1rm] of estimatedMaxes.entries()) {
