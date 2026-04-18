@@ -40,7 +40,7 @@
         </view>
 
         <!-- 力量测试入口 -->
-        <view class="card strength-test-entry" v-if="trainingStore.selectedTemplate && trainingStore.trainingLogs.length === 0" @tap="goToStrengthTest">
+        <view class="card strength-test-entry" v-if="trainingStore.selectedTemplate" @tap="goToStrengthTest">
           <view class="ste-header">
             <text class="ste-icon">💪</text>
             <view class="ste-info">
