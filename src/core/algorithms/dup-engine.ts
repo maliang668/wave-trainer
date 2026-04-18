@@ -1,66 +1,182 @@
-import type { TrainingDayConfig, CyclePhase, DailyPlan, DailyExercise, WarmupSet } from '@/core/types/training'
-import { DUP_CONFIG } from '@/core/constants/config'
-import { calculateWorkingWeight } from './rm-calculator'
+import type { TrainingDayConfig, CyclePhase, DailyPlan, DailyExercise, WarmupSet, SplitTemplate, SplitDayConfig } from '@/core/types/training'
+import { DUP_CONFIG, SPLIT_TEMPLATES } from '@/core/constants/config'
 import type { Exercise } from '@/core/types/exercise'
 
 /**
  * DUP（Daily Undulating Periodization）引擎
- * 实现波浪式负荷渐进循环训练的核心周期化逻辑
+ * 实现真正的每日波动周期化：
+ * - 同一周/循环内不同训练日有不同强度
+ * - 第1次训练：大重量（85% 1RM, 4-6次, RPE 8.5）
+ * - 第2次训练：中等（75% 1RM, 8-10次, RPE 7.5）
+ * - 第3次训练：轻量（65% 1RM, 12-15次, RPE 6.5）
+ * - 每3次训练为一个DUP微循环
+ * - 新手模板不区分强度等级，统一中等
  */
 
 /**
- * 根据微周期周数确定训练阶段
+ * 根据训练次数在DUP微循环中的位置确定强度等级
+ * @param trainingCountInCycle 当前周期内的第几次训练（1-based）
+ * @param isBeginner 是否为新手模板
+ * @param isDeloadWeek 是否为减负周
  */
-export function getCyclePhase(cycleWeek: number): CyclePhase {
-  if (cycleWeek <= 2) return 'power'
-  if (cycleWeek <= 3) return 'hypertrophy'
-  return 'deload'
+export function getDUPIntensityLevel(
+  trainingCountInCycle: number,
+  isBeginner: boolean = false,
+  isDeloadWeek: boolean = false
+): CyclePhase {
+  if (isDeloadWeek) return 'deload'
+  if (isBeginner) return 'medium' // 新手统一中等强度
+
+  // DUP核心：每3次训练为一个波动周期
+  const position = ((trainingCountInCycle - 1) % 3) + 1
+  switch (position) {
+    case 1: return 'heavy'    // 大重量日
+    case 2: return 'medium'   // 中等日
+    case 3: return 'light'    // 轻量日
+    default: return 'medium'
+  }
 }
 
 /**
- * 根据宏周期数和微周期周数计算强度系数
+ * 获取强度等级的中文名称
+ */
+export function getCyclePhaseName(phase: CyclePhase | string): string {
+  const map: Record<string, string> = {
+    heavy: '大重量日',
+    medium: '中等日',
+    light: '轻量日',
+    deload: '减负周',
+    rest: '休息',
+    power: '力量期',      // 兼容旧数据
+    hypertrophy: '肌肥大期', // 兼容旧数据
+  }
+  return map[phase] ?? phase
+}
+
+/**
+ * 获取强度等级的颜色
+ */
+export function getPhaseColor(phase: CyclePhase | string): string {
+  const colors: Record<string, string> = {
+    heavy: '#ef5350',
+    medium: '#ffa726',
+    light: '#66bb6a',
+    deload: '#4fc3f7',
+    rest: '#888888',
+    power: '#ef5350',
+    hypertrophy: '#66bb6a',
+  }
+  return colors[phase] ?? '#888888'
+}
+
+/**
+ * 根据DUP强度等级计算强度系数
  */
 export function calculateIntensityMultiplier(
-  macroCycle: number,
-  microWeek: number,
-  phase: CyclePhase
+  phase: CyclePhase,
+  macroCycle: number
 ): number {
-  // 基础强度
+  const levels = DUP_CONFIG.intensityLevels
   let baseIntensity: number
 
   switch (phase) {
-    case 'power':
-      baseIntensity = 0.85 // 85% 1RM
+    case 'heavy':
+      baseIntensity = levels.heavy.percent1RM
       break
-    case 'hypertrophy':
-      baseIntensity = 0.70 // 70% 1RM
+    case 'medium':
+      baseIntensity = levels.medium.percent1RM
+      break
+    case 'light':
+      baseIntensity = levels.light.percent1RM
       break
     case 'deload':
-      baseIntensity = 0.60 // 60% 1RM
+      baseIntensity = levels.deload.percent1RM
       break
     case 'rest':
       return 0
+    default:
+      baseIntensity = levels.medium.percent1RM
   }
 
-  // 宏周期递增（每个宏周期+2.5%）
+  // 宏周期递增（每个宏周期+2%）
   const macroIncrease = macroCycle * DUP_CONFIG.macroCycleIncrease
 
-  // 微周期内波浪调整
-  let microAdjustment = 0
-  if (phase === 'power') {
-    microAdjustment = (microWeek - 1) * 0.025 // 力量期每周+2.5%
-  } else if (phase === 'hypertrophy') {
-    microAdjustment = (microWeek - 3) * 0.015 // 肌肥大期微调
-  }
-
-  const totalIntensity = baseIntensity + macroIncrease + microAdjustment
-
-  // 不超过最大强度
-  return Math.min(totalIntensity, DUP_CONFIG.maxIntensity)
+  const totalIntensity = baseIntensity + macroIncrease
+  return Math.min(totalIntensity, 1.0)
 }
 
 /**
- * 生成每日训练计划
+ * 获取当前周期信息
+ */
+export function getCycleInfo(
+  startDate: string,
+  currentDate: string
+): { macroCycle: number; microWeek: number; totalWeeks: number; totalDays: number } {
+  const start = new Date(startDate)
+  const current = new Date(currentDate)
+  const diffDays = Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+  const totalDays = Math.max(diffDays, 0)
+  const totalWeeks = Math.floor(totalDays / 7) + 1
+
+  const macroCycle = Math.floor((totalWeeks - 1) / DUP_CONFIG.cycleLength) + 1
+  const microWeek = ((totalWeeks - 1) % DUP_CONFIG.cycleLength) + 1
+
+  return { macroCycle, microWeek, totalWeeks, totalDays }
+}
+
+/**
+ * 根据分化模板和日期确定今天是循环中的第几天
+ * @param template 分化模板
+ * @param startDate 开始日期
+ * @param currentDate 当前日期
+ */
+export function getDayInCycle(
+  template: SplitTemplate,
+  startDate: string,
+  currentDate: string
+): { dayIndex: number; splitDay: SplitDayConfig; trainingCountInCycle: number } {
+  const start = new Date(startDate)
+  const current = new Date(currentDate)
+  const diffDays = Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+
+  // 在循环中的位置（0-based）
+  const positionInCycle = diffDays % template.cycleDays
+  const dayIndex = positionInCycle
+
+  // 获取对应的分化日配置
+  const splitDay = template.days[dayIndex] || { dayIndex: 0, label: '休息', type: 'rest' as const, exercises: [] }
+
+  // 计算到今天为止已经完成了多少次训练（用于DUP强度分配）
+  let trainingCountInCycle = 0
+  for (let i = 0; i < dayIndex; i++) {
+    if (template.days[i] && template.days[i].type !== 'rest') {
+      trainingCountInCycle++
+    }
+  }
+  // 如果今天也是训练日，算上今天
+  if (splitDay.type !== 'rest') {
+    trainingCountInCycle++
+  }
+
+  // 计算从开始到现在的总训练次数（用于跨循环的DUP计数）
+  const completedCycles = Math.floor(diffDays / template.cycleDays)
+  const totalTrainingCount = completedCycles * template.days.filter(d => d.type !== 'rest').length + trainingCountInCycle
+
+  return { dayIndex, splitDay, trainingCountInCycle: totalTrainingCount }
+}
+
+/**
+ * 判断是否应该减负
+ * @param macroCycle 当前宏周期数
+ * @param totalWeeks 总周数
+ */
+export function shouldDeload(macroCycle: number, totalWeeks: number): boolean {
+  // 每4个宏周期减负一次
+  return macroCycle > 0 && macroCycle % DUP_CONFIG.deloadInterval === 0
+}
+
+/**
+ * 生成每日训练计划（核心函数）
  */
 export function generateDailyPlan(
   dayConfig: TrainingDayConfig,
@@ -68,45 +184,70 @@ export function generateDailyPlan(
   exerciseMaxes: Map<string, number>,
   date: string,
   macroCycle: number,
-  microWeek: number,
-  barWeight: number = 20
+  trainingCountInCycle: number,
+  isBeginner: boolean = false,
+  isDeloadWeek: boolean = false,
+  barWeight: number = 20,
+  splitTemplateId?: string,
+  splitDayLabel?: string
 ): DailyPlan {
-  const cycleWeek = ((macroCycle - 1) * DUP_CONFIG.cycleLength + microWeek)
-  const phase = getCyclePhase(microWeek)
-  const intensityMultiplier = calculateIntensityMultiplier(macroCycle, microWeek, phase)
+  // 确定DUP强度等级
+  const phase = getDUPIntensityLevel(trainingCountInCycle, isBeginner, isDeloadWeek)
+  const intensityMultiplier = calculateIntensityMultiplier(phase, macroCycle)
+
+  // 获取强度等级配置
+  const levelConfig = DUP_CONFIG.intensityLevels[phase as keyof typeof DUP_CONFIG.intensityLevels] || DUP_CONFIG.intensityLevels.medium
 
   const dailyExercises: DailyExercise[] = dayConfig.exercises.map(planEx => {
     const exercise = exerciseData.find(ex => ex.id === planEx.exerciseId)
     const e1RM = exerciseMaxes.get(planEx.exerciseId) ?? 0
 
-    // 根据强度系数计算建议重量
-    const targetIntensity = planEx.percent1RM * intensityMultiplier
-    const suggestedWeight = e1RM > 0
-      ? Math.round(e1RM * targetIntensity / 2.5) * 2.5 // 四舍五入到2.5的倍数
-      : 0
+    // 计算建议重量
+    let suggestedWeight = 0
+    if (e1RM > 0 && planEx.percent1RM > 0) {
+      const targetIntensity = planEx.percent1RM * intensityMultiplier
+      suggestedWeight = Math.round(e1RM * targetIntensity / 2.5) * 2.5
+    } else if (e1RM > 0) {
+      // 没有配置percent1RM的动作（如平板支撑），使用e1RM作为参考
+      suggestedWeight = e1RM
+    }
 
     // 计算目标RPE
     let targetRPE = planEx.rpeTarget
-    if (phase === 'deload') {
-      targetRPE = Math.min(targetRPE, 6)
+    if (isDeloadWeek) {
+      targetRPE = Math.min(targetRPE, DUP_CONFIG.intensityLevels.deload.rpeTarget)
+    } else if (!isBeginner && levelConfig && 'rpeTarget' in levelConfig) {
+      // DUP模式：根据强度等级调整RPE
+      targetRPE = Math.round(((planEx.rpeTarget + (levelConfig as any).rpeTarget) / 2) * 2) / 2
     }
 
     // 计算目标次数
-    let targetReps: [number, number] = planEx.repsRange
-    if (phase === 'power') {
-      targetReps = [Math.max(targetReps[0] - 2, 1), Math.max(targetReps[1] - 2, 2)]
-    } else if (phase === 'deload') {
-      targetReps = [Math.min(targetReps[0], 6), Math.min(targetReps[1], 8)]
+    let targetReps: [number, number] = [...planEx.repsRange] as [number, number]
+    if (!isBeginner && levelConfig && 'repsModifier' in levelConfig) {
+      const mod = (levelConfig as any).repsModifier
+      targetReps = [
+        Math.max(targetReps[0] + mod, 1),
+        Math.max(targetReps[1] + mod, 2),
+      ]
+    }
+    if (isDeloadWeek) {
+      targetReps = [
+        Math.min(targetReps[0], 8),
+        Math.min(targetReps[1], 10),
+      ]
     }
 
     // 计算组数
     let sets = planEx.sets
-    if (phase === 'deload') {
-      sets = Math.max(2, Math.floor(sets * 0.6))
+    if (!isBeginner && levelConfig && 'setsModifier' in levelConfig) {
+      sets = Math.max(2, sets + (levelConfig as any).setsModifier)
+    }
+    if (isDeloadWeek) {
+      sets = Math.max(2, Math.floor(sets * DUP_CONFIG.intensityLevels.deload.volumeReduction))
     }
 
     // 生成热身组
-    const warmupSets = suggestedWeight > barWeight
+    const warmupSets = suggestedWeight > barWeight && suggestedWeight > 0
       ? generateWarmupSets(barWeight, suggestedWeight, targetReps[0])
       : []
 
@@ -126,13 +267,23 @@ export function generateDailyPlan(
   const totalSets = dailyExercises.reduce((sum, ex) => sum + ex.sets + ex.warmupSets.length, 0)
   const estimatedDuration = totalSets * 2
 
+  // 强度标签
+  const intensityLabel = isDeloadWeek
+    ? DUP_CONFIG.intensityLevels.deload.label
+    : isBeginner
+      ? '中等强度'
+      : (DUP_CONFIG.intensityLevels[phase as keyof typeof DUP_CONFIG.intensityLevels]?.label ?? '训练日')
+
   return {
     date,
     dayConfig,
-    cycleWeek,
+    cycleDay: trainingCountInCycle,
     cyclePhase: phase,
+    intensityLabel,
     exercises: dailyExercises,
     estimatedDuration,
+    splitTemplateId,
+    splitDayLabel,
   }
 }
 
@@ -176,29 +327,15 @@ export function generateWarmupSets(
 }
 
 /**
- * 获取当前周期信息
+ * 获取分化模板
  */
-export function getCyclePhaseName(phase: CyclePhase | string): string {
-  const map: Record<string, string> = {
-    power: '力量期',
-    hypertrophy: '肌肥大期',
-    deload: '减负周',
-    rest: '休息',
-  }
-  return map[phase] ?? phase
+export function getSplitTemplate(templateId: string): SplitTemplate | undefined {
+  return SPLIT_TEMPLATES.find(t => t.id === templateId)
 }
 
-export function getCycleInfo(
-  startDate: string,
-  currentDate: string
-): { macroCycle: number; microWeek: number; totalWeeks: number } {
-  const start = new Date(startDate)
-  const current = new Date(currentDate)
-  const diffDays = Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-  const totalWeeks = Math.floor(diffDays / 7) + 1
-
-  const macroCycle = Math.floor((totalWeeks - 1) / DUP_CONFIG.cycleLength) + 1
-  const microWeek = ((totalWeeks - 1) % DUP_CONFIG.cycleLength) + 1
-
-  return { macroCycle, microWeek, totalWeeks }
+/**
+ * 获取所有可用模板
+ */
+export function getAllSplitTemplates(): SplitTemplate[] {
+  return SPLIT_TEMPLATES
 }

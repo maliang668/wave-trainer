@@ -28,7 +28,8 @@ export interface TrainingLog {
   date: string
   planId?: string
   planName?: string
-  cycleWeek: number
+  splitTemplateId?: string
+  cycleDay: number
   cyclePhase: CyclePhase
   exercises: ExerciseRecord[]
   duration: number
@@ -38,7 +39,8 @@ export interface TrainingLog {
   createdAt: string
 }
 
-export type CyclePhase = 'power' | 'hypertrophy' | 'deload' | 'rest'
+// DUP训练阶段（每日波动周期化）
+export type CyclePhase = 'heavy' | 'medium' | 'light' | 'deload' | 'rest'
 
 // 情境数据
 export interface ContextData {
@@ -60,8 +62,28 @@ export interface PlanExercise {
 // 训练日配置
 export interface TrainingDayConfig {
   dayLabel: string
-  dayType: 'upper_power' | 'lower_power' | 'upper_hypertrophy' | 'lower_hypertrophy' | 'rest'
+  dayType: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'rest'
   exercises: PlanExercise[]
+}
+
+// 分化训练模板
+export interface SplitTemplate {
+  id: string
+  name: string
+  description: string
+  level: 'beginner' | 'intermediate' | 'advanced'
+  daysPerWeek: number
+  cycleDays: number  // 循环总天数（如5天：胸/背/休/腿/休）
+  days: SplitDayConfig[]
+}
+
+// 分化日配置
+export interface SplitDayConfig {
+  dayIndex: number  // 在循环中的位置（0-based）
+  label: string     // 如 '胸部日', '背部日', '休息'
+  type: 'chest' | 'back' | 'legs' | 'upper' | 'lower' | 'push' | 'pull' | 'full_body' | 'rest'
+  exercises: PlanExercise[]
+  description?: string  // 如 '胸大肌、三角肌前束、肱三头肌'
 }
 
 // 训练计划
@@ -78,16 +100,19 @@ export interface TrainingPlan {
   createdAt: string
 }
 
-export type PlanType = 'upper_lower' | 'push_pull_legs' | 'full_body' | 'custom'
+export type PlanType = 'full_body_beginner' | 'upper_lower' | 'push_pull_legs' | 'chest_back_legs' | 'custom'
 
 // 每日生成的训练计划
 export interface DailyPlan {
   date: string
   dayConfig: TrainingDayConfig
-  cycleWeek: number
+  cycleDay: number
   cyclePhase: CyclePhase
+  intensityLabel: string  // '大重量日' | '中等日' | '轻量日' | '减负周'
   exercises: DailyExercise[]
   estimatedDuration: number
+  splitTemplateId?: string
+  splitDayLabel?: string
 }
 
 export interface DailyExercise {

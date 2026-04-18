@@ -2,84 +2,110 @@
   <view class="page">
     <!-- 非训练模式 -->
     <view v-if="!trainingStore.isTraining">
-      <!-- 今日计划卡片 -->
-      <view class="card plan-card" v-if="trainingStore.todayPlan">
-        <view class="plan-header">
-          <view class="plan-title">
-            <text class="phase-tag" :class="trainingStore.todayPlan.cyclePhase">
-              {{ cyclePhaseName }}
+
+      <!-- 未选择模板：引导选择 -->
+      <view class="card onboard-card" v-if="!trainingStore.hasSelectedTemplate">
+        <text class="onboard-emoji">🏋️</text>
+        <text class="onboard-title">选择你的训练方案</text>
+        <text class="onboard-desc">根据你的训练经验，选择合适的分化训练方案。系统会根据DUP科学周期化自动安排每日训练内容。</text>
+        <view class="btn-primary onboard-btn" @tap="goToSplitPicker">
+          选择训练方案
+        </view>
+      </view>
+
+      <!-- 已选择模板 -->
+      <template v-else>
+        <!-- 今日计划卡片 -->
+        <view class="card plan-card" v-if="trainingStore.todayPlan">
+          <view class="plan-header">
+            <view class="plan-title">
+              <text class="phase-tag" :style="{ background: phaseColor }">
+                {{ trainingStore.currentIntensityLabel }}
+              </text>
+              <text class="plan-week">{{ trainingStore.todayPlan.splitDayLabel || '训练日' }}</text>
+            </view>
+            <view class="plan-header-right">
+              <text class="plan-date">{{ todayDate }}</text>
+              <text class="switch-plan" @tap="goToSplitPicker">切换方案</text>
+            </view>
+          </view>
+          <view class="plan-meta">
+            <text class="meta-item">⏱️ 预计 {{ trainingStore.todayPlan.estimatedDuration }}分钟</text>
+            <text class="meta-item">💪 {{ trainingStore.todayPlan.exercises.length }}个动作</text>
+            <text class="meta-item" v-if="trainingStore.selectedTemplate">
+              📋 {{ trainingStore.selectedTemplate.name }}
             </text>
-            <text class="plan-week">第{{ trainingStore.currentCycleWeek }}周 / 第{{ weekInCycle }}天</text>
           </view>
-          <text class="plan-date">{{ todayDate }}</text>
         </view>
-        <view class="plan-meta">
-          <text class="meta-item">⏱️ 预计 {{ trainingStore.todayPlan.estimatedDuration }}分钟</text>
-          <text class="meta-item">💪 {{ trainingStore.todayPlan.exercises.length }}个动作</text>
-        </view>
-      </view>
 
-      <!-- 休息日 -->
-      <view class="card rest-card" v-else>
-        <text class="rest-emoji">😴</text>
-        <text class="rest-text">今天是休息日</text>
-        <text class="rest-sub">好好恢复，为下次训练蓄力</text>
-      </view>
+        <!-- 休息日 -->
+        <view class="card rest-card" v-else>
+          <text class="rest-emoji">😴</text>
+          <text class="rest-text">今天是休息日</text>
+          <text class="rest-sub">好好恢复，为下次训练蓄力</text>
+          <text class="rest-sub" v-if="trainingStore.selectedTemplate">
+            当前方案：{{ trainingStore.selectedTemplate.name }}
+          </text>
+          <view class="btn-secondary rest-switch-btn" @tap="goToSplitPicker" style="margin-top: 24rpx;">
+            切换方案
+          </view>
+        </view>
 
-      <!-- 动作列表 -->
-      <view v-if="trainingStore.todayPlan" class="exercise-list">
-        <view class="section-title">今日训练</view>
-        <view class="plan-actions">
-          <view class="btn-secondary btn-sm" @tap="openExercisePicker">
-            + 添加/替换动作
+        <!-- 动作列表 -->
+        <view v-if="trainingStore.todayPlan" class="exercise-list">
+          <view class="section-title">今日训练</view>
+          <view class="plan-actions">
+            <view class="btn-secondary btn-sm" @tap="openExercisePicker">
+              + 添加/替换动作
+            </view>
+            <view class="btn-secondary btn-sm" @tap="resetToDefaultPlan" v-if="isCustomPlan">
+              恢复默认
+            </view>
           </view>
-          <view class="btn-secondary btn-sm" @tap="resetToDefaultPlan" v-if="isCustomPlan">
-            恢复默认
+          <view
+            v-for="(ex, index) in trainingStore.todayPlan.exercises"
+            :key="ex.exerciseId"
+            class="card exercise-card"
+          >
+            <view class="ex-header">
+              <text class="ex-name">{{ ex.name }}</text>
+              <text class="ex-muscle">{{ MUSCLE_GROUP_NAMES[ex.muscleGroup] || ex.muscleGroup }}</text>
+            </view>
+            <view class="ex-details">
+              <view class="ex-detail-item">
+                <text class="detail-label">重量</text>
+                <text class="detail-value text-primary">{{ ex.suggestedWeight }}kg</text>
+              </view>
+              <view class="ex-detail-item">
+                <text class="detail-label">组数</text>
+                <text class="detail-value">{{ ex.sets }}组</text>
+              </view>
+              <view class="ex-detail-item">
+                <text class="detail-label">次数</text>
+                <text class="detail-value">{{ ex.targetReps[0] }}-{{ ex.targetReps[1] }}</text>
+              </view>
+              <view class="ex-detail-item">
+                <text class="detail-label">RPE</text>
+                <text class="detail-value text-warning">{{ ex.targetRPE }}</text>
+              </view>
+            </view>
+            <!-- 热身组 -->
+            <view v-if="ex.warmupSets.length > 0" class="warmup-section">
+              <text class="warmup-title">🔥 热身</text>
+              <view v-for="(ws, wi) in ex.warmupSets" :key="wi" class="warmup-set">
+                <text>{{ ws.weight }}kg × {{ ws.reps }}</text>
+              </view>
+            </view>
           </view>
         </view>
-        <view
-          v-for="(ex, index) in trainingStore.todayPlan.exercises"
-          :key="ex.exerciseId"
-          class="card exercise-card"
-        >
-          <view class="ex-header">
-            <text class="ex-name">{{ ex.name }}</text>
-            <text class="ex-muscle">{{ MUSCLE_GROUP_NAMES[ex.muscleGroup] || ex.muscleGroup }}</text>
-          </view>
-          <view class="ex-details">
-            <view class="ex-detail-item">
-              <text class="detail-label">重量</text>
-              <text class="detail-value text-primary">{{ ex.suggestedWeight }}kg</text>
-            </view>
-            <view class="ex-detail-item">
-              <text class="detail-label">组数</text>
-              <text class="detail-value">{{ ex.sets }}组</text>
-            </view>
-            <view class="ex-detail-item">
-              <text class="detail-label">次数</text>
-              <text class="detail-value">{{ ex.targetReps[0] }}-{{ ex.targetReps[1] }}</text>
-            </view>
-            <view class="ex-detail-item">
-              <text class="detail-label">RPE</text>
-              <text class="detail-value text-warning">{{ ex.targetRPE }}</text>
-            </view>
-          </view>
-          <!-- 热身组 -->
-          <view v-if="ex.warmupSets.length > 0" class="warmup-section">
-            <text class="warmup-title">🔥 热身</text>
-            <view v-for="(ws, wi) in ex.warmupSets" :key="wi" class="warmup-set">
-              <text>{{ ws.weight }}kg × {{ ws.reps }}</text>
-            </view>
-          </view>
-        </view>
-      </view>
 
-      <!-- 开始训练按钮 -->
-      <view v-if="trainingStore.todayPlan" class="start-btn-wrapper">
-        <view class="btn-primary start-btn" @tap="startTraining">
-          开始训练
+        <!-- 开始训练按钮 -->
+        <view v-if="trainingStore.todayPlan" class="start-btn-wrapper">
+          <view class="btn-primary start-btn" @tap="startTraining">
+            开始训练
+          </view>
         </view>
-      </view>
+      </template>
 
       <!-- 最近训练 -->
       <view class="recent-section" v-if="recentLogs.length > 0">
@@ -87,7 +113,9 @@
         <view v-for="log in recentLogs" :key="log._id" class="card log-card">
           <view class="log-header">
             <text class="log-date">{{ log.date }}</text>
-            <text class="log-phase" :class="log.cyclePhase">{{ getCyclePhaseName(log.cyclePhase) }}</text>
+            <text class="log-phase" :style="{ background: getPhaseColor(log.cyclePhase) + '33', color: getPhaseColor(log.cyclePhase) }">
+              {{ getCyclePhaseName(log.cyclePhase) }}
+            </text>
           </view>
           <view class="log-exercises">
             <text v-for="ex in log.exercises" :key="ex.exerciseId" class="log-ex-name">
@@ -233,7 +261,7 @@ import { useTrainingStore } from '../../stores/training'
 import { useUserStore } from '../../stores/user'
 import { useExerciseStore } from '../../stores/exercise'
 import { getRPEDescription } from '../../core/algorithms/rpe-manager'
-import { getCyclePhaseName } from '../../core/algorithms/dup-engine'
+import { getCyclePhaseName, getPhaseColor } from '../../core/algorithms/dup-engine'
 import { RPE_CONFIG } from '../../core/constants/config'
 import { formatVolume, formatDate } from '../../utils/format'
 import { MUSCLE_GROUP_NAMES } from '../../core/types/exercise'
@@ -245,10 +273,11 @@ const exerciseStore = useExerciseStore()
 
 // 日期
 const todayDate = formatDate(new Date())
-const cyclePhaseName = computed(() => getCyclePhaseName(trainingStore.todayPlan?.cyclePhase || 'rest'))
-const weekInCycle = computed(() => {
-  const week = trainingStore.currentCycleWeek
-  return ((week - 1) % 4) + 1
+
+// 当前强度等级颜色
+const phaseColor = computed(() => {
+  if (!trainingStore.todayPlan) return '#888'
+  return getPhaseColor(trainingStore.todayPlan.cyclePhase)
 })
 
 // 最近训练
@@ -309,6 +338,11 @@ function getRPEColor(rpe: number): string {
   if (rpe >= 9) return 'text-danger'
   if (rpe >= 8) return 'text-warning'
   return 'text-success'
+}
+
+// 跳转到模板选择页
+function goToSplitPicker() {
+  uni.navigateTo({ url: '/pages/split-picker/split-picker' })
 }
 
 // 开始训练
@@ -385,16 +419,13 @@ function completeSet() {
 
   // 检查是否完成当前动作的所有组
   if (currentExercise.value && completedSetsForExercise.value.length >= currentExercise.value.sets) {
-    // 移动到下一个动作
     moveToNextExercise()
   } else {
-    // 显示计时器
     showTimer.value = true
     timerSeconds.value = userStore.profile?.preferences.restTimerDefault || 120
     startTimer()
   }
 
-  // 重置输入
   selectedBeginnerLevel.value = -1
 }
 
@@ -411,7 +442,6 @@ function moveToNextExercise() {
     showTimer.value = false
     stopTimer()
   } else {
-    // 所有动作完成
     finishTraining()
   }
 }
@@ -483,7 +513,6 @@ const customExerciseIds = ref<string[]>([])
 
 // 打开动作选择器
 function openExercisePicker() {
-  // 将当前动作ID列表传递给选择器页面
   const currentIds = trainingStore.todayPlan
     ? trainingStore.todayPlan.exercises.map(ex => ex.exerciseId)
     : []
@@ -491,7 +520,7 @@ function openExercisePicker() {
   uni.navigateTo({ url: '/pages/exercise-picker/exercise-picker' })
 }
 
-// 动作选择完成回调（供选择器页面调用）
+// 动作选择完成回调
 function onExercisesSelected(ids: string[]) {
   customExerciseIds.value = ids
   isCustomPlan.value = true
@@ -505,7 +534,6 @@ function rebuildPlanWithExercises(exerciseIds: string[]) {
   const exerciseStoreLocal = useExerciseStore()
   const userStoreLocal = useUserStore()
 
-  // 构建新的训练日配置
   const exercises = exerciseIds.map(id => {
     const ex = exerciseStoreLocal.getExercise(id)
     const isCompound = ex?.category === 'compound'
@@ -518,7 +546,6 @@ function rebuildPlanWithExercises(exerciseIds: string[]) {
     }
   })
 
-  // 更新 store 中的计划
   trainingStore.updateDayExercises(exercises)
 }
 
@@ -538,6 +565,25 @@ onShow(() => {
 <style scoped>
 .page {
   padding-bottom: 120rpx;
+}
+
+/* 引导卡片 */
+.onboard-card {
+  text-align: center;
+  padding: 60rpx 32rpx;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1rpx solid #2a2a4a;
+}
+.onboard-emoji { font-size: 80rpx; display: block; margin-bottom: 16rpx; }
+.onboard-title { display: block; font-size: 36rpx; font-weight: 700; color: #e0e0e0; margin-bottom: 16rpx; }
+.onboard-desc { display: block; font-size: 26rpx; color: #aaa; line-height: 1.8; margin-bottom: 32rpx; }
+.onboard-btn {
+  width: 80%;
+  margin: 0 auto;
+  padding: 28rpx;
+  font-size: 32rpx;
+  border-radius: 16rpx;
+  text-align: center;
 }
 
 /* 计划卡片 */
@@ -561,22 +607,32 @@ onShow(() => {
   padding: 4rpx 16rpx;
   border-radius: 8rpx;
   font-weight: 600;
+  color: white;
 }
-.phase-tag.power { background: #e53935; color: white; }
-.phase-tag.hypertrophy { background: #43a047; color: white; }
-.phase-tag.deload { background: #1e88e5; color: white; }
 .plan-week {
   font-size: 28rpx;
   color: #e0e0e0;
   font-weight: 600;
 }
+.plan-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
 .plan-date {
   font-size: 24rpx;
   color: #888;
 }
+.switch-plan {
+  font-size: 22rpx;
+  color: #4fc3f7;
+  padding: 4rpx 12rpx;
+}
 .plan-meta {
   display: flex;
   gap: 24rpx;
+  flex-wrap: wrap;
 }
 .meta-item {
   font-size: 24rpx;
@@ -591,6 +647,12 @@ onShow(() => {
 .rest-emoji { font-size: 80rpx; }
 .rest-text { display: block; font-size: 36rpx; font-weight: 600; margin-top: 16rpx; }
 .rest-sub { display: block; font-size: 26rpx; color: #888; margin-top: 8rpx; }
+.rest-switch-btn {
+  display: inline-block;
+  padding: 12rpx 32rpx;
+  font-size: 24rpx;
+  border-radius: 8rpx;
+}
 
 /* 动作列表 */
 .section-title {
@@ -692,8 +754,6 @@ onShow(() => {
   padding: 2rpx 12rpx;
   border-radius: 6rpx;
 }
-.log-phase.power { background: rgba(229,57,53,0.2); color: #ef5350; }
-.log-phase.hypertrophy { background: rgba(67,160,71,0.2); color: #66bb6a; }
 .log-exercises {
   display: flex;
   flex-wrap: wrap;

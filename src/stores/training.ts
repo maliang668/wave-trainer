@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { TrainingLog, ExerciseRecord, DailyPlan, ContextData, TrainingSet, CyclePhase, TrainingDayConfig } from '../core/types/training'
+import type { TrainingLog, ExerciseRecord, DailyPlan, ContextData, TrainingSet, CyclePhase, TrainingDayConfig, SplitTemplate } from '../core/types/training'
 import type { CoachRecommendation } from '../core/types/algorithm'
 import { cloudService, COLLECTIONS } from '../services/cloud'
 import { estimate1RM } from '../core/algorithms/rm-calculator'
 import { generateRPEAdjustment } from '../core/algorithms/rpe-manager'
-import { getCycleInfo, getCyclePhase, generateDailyPlan } from '../core/algorithms/dup-engine'
+import { getDayInCycle, getDUPIntensityLevel, generateDailyPlan, getCycleInfo, getCyclePhaseName, shouldDeload, getSplitTemplate } from '../core/algorithms/dup-engine'
 import { evaluateDeloadNeed } from '../core/algorithms/deload-detector'
 import { detectPlateau } from '../core/algorithms/plateau-detector'
 import { generateReturnPlan } from '../core/algorithms/return-planner'
@@ -13,9 +13,9 @@ import { assessFatigue } from '../core/algorithms/fatigue-assessor'
 import { formatDate, daysBetween } from '../utils/format'
 import { useExerciseStore } from './exercise'
 import type { Exercise } from '../core/types/exercise'
+import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS } from '../core/constants/config'
 
 // 延迟获取 userStore，避免循环依赖
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 function getUserStore() {
   const { useUserStore } = require('./user')
   return useUserStore()
@@ -28,6 +28,9 @@ export const useTrainingStore = defineStore('training', () => {
   const planStartDate = ref<string>(formatDate(new Date()))
   const recommendations = ref<CoachRecommendation[]>([])
   const isLoading = ref(false)
+
+  // 分化模板
+  const selectedTemplateId = ref<string>('')
 
   // 当前训练状态
   const isTraining = ref(false)
@@ -46,8 +49,26 @@ export const useTrainingStore = defineStore('training', () => {
   const totalTrainingDays = computed(() => trainingLogs.value.length)
   const cycleInfo = computed(() => getCycleInfo(planStartDate.value, formatDate(new Date())))
   const currentCycleWeek = computed(() => cycleInfo.value.totalWeeks)
-  const weekInCycle = computed(() => cycleInfo.value.microWeek)
-  const currentCyclePhase = computed((): CyclePhase => getCyclePhase(cycleInfo.value.microWeek))
+
+  // 当前选中的模板
+  const selectedTemplate = computed((): SplitTemplate | undefined => {
+    if (!selectedTemplateId.value) return undefined
+    return getSplitTemplate(selectedTemplateId.value)
+  })
+
+  const hasSelectedTemplate = computed(() => !!selectedTemplate.value)
+
+  // 当前DUP强度等级
+  const currentCyclePhase = computed((): CyclePhase => {
+    if (!currentPlan.value) return 'rest'
+    return currentPlan.value.cyclePhase
+  })
+
+  // 当前强度标签
+  const currentIntensityLabel = computed((): string => {
+    if (!currentPlan.value) return ''
+    return currentPlan.value.intensityLabel || getCyclePhaseName(currentPlan.value.cyclePhase)
+  })
 
   const recentLogs = computed(() => trainingLogs.value.slice(0, 5))
 
@@ -79,6 +100,8 @@ export const useTrainingStore = defineStore('training', () => {
     try {
       await loadTrainingLogs()
       await loadPlanStartDate()
+      await loadSelectedTemplate()
+      generateTodayPlan()
       generateRecommendations()
     } catch (e) {
       console.error('训练Store初始化失败', e)
@@ -103,18 +126,57 @@ export const useTrainingStore = defineStore('training', () => {
     } catch { /* ignore */ }
   }
 
+  // 加载选中的模板
+  async function loadSelectedTemplate() {
+    try {
+      const data = uni.getStorageSync('wt_selected_template')
+      if (data) {
+        selectedTemplateId.value = data
+      }
+    } catch { /* ignore */ }
+  }
+
   // 设置计划开始日期
   function setPlanStartDate(date: string) {
     planStartDate.value = date
     uni.setStorageSync('wt_plan_start_date', date)
   }
 
+  // 选择分化模板
+  function selectTemplate(templateId: string) {
+    selectedTemplateId.value = templateId
+    uni.setStorageSync('wt_selected_template', templateId)
+    // 选择模板后重置开始日期为今天
+    planStartDate.value = formatDate(new Date())
+    uni.setStorageSync('wt_plan_start_date', planStartDate.value)
+    // 立即生成今日计划
+    generateTodayPlan()
+  }
+
   // 生成今日训练计划
   function generateTodayPlan() {
     if (isTraining.value) return
+
+    // 如果没有选择模板，不生成计划
+    if (!selectedTemplate.value) {
+      currentPlan.value = null
+      return
+    }
+
     try {
+      const template = selectedTemplate.value!
       const info = getCycleInfo(planStartDate.value, formatDate(new Date()))
-      const phase = getCyclePhase(info.microWeek)
+      const { dayIndex, splitDay, trainingCountInCycle } = getDayInCycle(
+        template,
+        planStartDate.value,
+        formatDate(new Date())
+      )
+
+      // 如果今天是休息日
+      if (splitDay.type === 'rest') {
+        currentPlan.value = null
+        return
+      }
 
       // 获取用户动作最大值
       const userStore = getUserStore()
@@ -124,25 +186,7 @@ export const useTrainingStore = defineStore('training', () => {
       }
 
       // 为没有e1RM数据的动作设置默认重量
-      const defaultWeights: Record<string, number> = {
-        'bench_press': 40,
-        'incline_bench_press': 30,
-        'dumbbell_bench_press': 20,
-        'barbell_row': 40,
-        'overhead_press': 30,
-        'barbell_squat': 50,
-        'deadlift': 60,
-        'barbell_curl': 15,
-        'tricep_pushdown': 20,
-        'lateral_raise': 10,
-        'lat_pulldown': 35,
-        'leg_press': 60,
-        'leg_extension': 25,
-        'leg_curl': 25,
-        'calf_raise': 30,
-      }
-      // 为没有记录的动作设置默认重量
-      for (const [id, weight] of Object.entries(defaultWeights)) {
+      for (const [id, weight] of Object.entries(DEFAULT_WEIGHTS)) {
         if (!exerciseMaxMap.has(id)) {
           exerciseMaxMap.set(id, weight)
         }
@@ -152,28 +196,32 @@ export const useTrainingStore = defineStore('training', () => {
       const exerciseStore = useExerciseStore()
       const exerciseData: Exercise[] = exerciseStore.exercises
 
-      // 构建训练日配置（默认上肢力量日）
+      // 构建训练日配置
       const dayConfig: TrainingDayConfig = {
-        dayLabel: '训练日',
-        dayType: 'upper_power',
-        exercises: [
-          { exerciseId: 'bench_press', sets: 4, repsRange: [4, 6], rpeTarget: 8, percent1RM: 0.85 },
-          { exerciseId: 'overhead_press', sets: 3, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
-          { exerciseId: 'barbell_row', sets: 4, repsRange: [6, 8], rpeTarget: 7.5, percent1RM: 0.75 },
-          { exerciseId: 'barbell_curl', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
-          { exerciseId: 'tricep_pushdown', sets: 3, repsRange: [8, 12], rpeTarget: 7, percent1RM: 0.65 },
-        ],
+        dayLabel: splitDay.label,
+        dayType: splitDay.type,
+        exercises: splitDay.exercises,
       }
 
-      // 根据周期信息生成每日计划
+      // 判断是否为新手模板
+      const isBeginner = template.level === 'beginner'
+
+      // 判断是否为减负周
+      const isDeloadWeek = shouldDeload(info.macroCycle, info.totalWeeks)
+
+      // 生成每日计划
       const plan = generateDailyPlan(
         dayConfig,
         exerciseData,
         exerciseMaxMap,
         formatDate(new Date()),
         info.macroCycle,
-        info.microWeek,
-        userStore.barWeight
+        trainingCountInCycle,
+        isBeginner,
+        isDeloadWeek,
+        userStore.barWeight,
+        template.id,
+        splitDay.label
       )
       currentPlan.value = plan
     } catch (e) {
@@ -187,7 +235,16 @@ export const useTrainingStore = defineStore('training', () => {
     if (!currentPlan.value) return
 
     try {
+      const template = selectedTemplate.value
+      if (!template) return
+
       const info = getCycleInfo(planStartDate.value, formatDate(new Date()))
+      const { trainingCountInCycle } = getDayInCycle(
+        template,
+        planStartDate.value,
+        formatDate(new Date())
+      )
+
       const userStore = getUserStore()
       const exerciseStore = useExerciseStore()
 
@@ -196,26 +253,7 @@ export const useTrainingStore = defineStore('training', () => {
       for (const [id, max] of Object.entries(userStore.exerciseMaxes)) {
         exerciseMaxMap.set(id, (max as any).estimated1RM)
       }
-
-      // 为没有e1RM数据的动作设置默认重量
-      const defaultWeights: Record<string, number> = {
-        'bench_press': 40,
-        'incline_bench_press': 30,
-        'dumbbell_bench_press': 20,
-        'barbell_row': 40,
-        'overhead_press': 30,
-        'barbell_squat': 50,
-        'deadlift': 60,
-        'barbell_curl': 15,
-        'tricep_pushdown': 20,
-        'lateral_raise': 10,
-        'lat_pulldown': 35,
-        'leg_press': 60,
-        'leg_extension': 25,
-        'leg_curl': 25,
-        'calf_raise': 30,
-      }
-      for (const [id, weight] of Object.entries(defaultWeights)) {
+      for (const [id, weight] of Object.entries(DEFAULT_WEIGHTS)) {
         if (!exerciseMaxMap.has(id)) {
           exerciseMaxMap.set(id, weight)
         }
@@ -223,10 +261,13 @@ export const useTrainingStore = defineStore('training', () => {
 
       // 用新的动作列表构建 dayConfig
       const dayConfig: TrainingDayConfig = {
-        dayLabel: '训练日',
+        dayLabel: currentPlan.value.dayConfig.dayLabel,
         dayType: currentPlan.value.dayConfig.dayType,
         exercises,
       }
+
+      const isBeginner = template.level === 'beginner'
+      const isDeloadWeek = shouldDeload(info.macroCycle, info.totalWeeks)
 
       // 重新生成计划
       const plan = generateDailyPlan(
@@ -235,8 +276,12 @@ export const useTrainingStore = defineStore('training', () => {
         exerciseMaxMap,
         formatDate(new Date()),
         info.macroCycle,
-        info.microWeek,
-        userStore.barWeight
+        trainingCountInCycle,
+        isBeginner,
+        isDeloadWeek,
+        userStore.barWeight,
+        template.id,
+        currentPlan.value.splitDayLabel
       )
       currentPlan.value = plan
     } catch (e) {
@@ -254,7 +299,8 @@ export const useTrainingStore = defineStore('training', () => {
     currentSetIndex.value = 0
     todayLog.value = {
       date: formatDate(new Date()),
-      cycleWeek: activePlan.cycleWeek,
+      splitTemplateId: activePlan.splitTemplateId,
+      cycleDay: activePlan.cycleDay,
       cyclePhase: activePlan.cyclePhase,
       exercises: activePlan.exercises.map(ex => ({
         exerciseId: ex.exerciseId,
@@ -300,7 +346,6 @@ export const useTrainingStore = defineStore('training', () => {
       if (planEx) {
         const adjustment = generateRPEAdjustment(set.weight, set.rpe, planEx.targetRPE)
         if (adjustment.adjustmentPercent !== 0) {
-          // 返回调整建议（UI层使用）
           return adjustment
         }
       }
@@ -314,14 +359,14 @@ export const useTrainingStore = defineStore('training', () => {
 
     const log: TrainingLog = {
       ...todayLog.value as TrainingLog,
-      duration: 0, // TODO: 计算实际训练时长
+      duration: 0,
     }
 
     // 保存到云端
     const id = await cloudService.add(COLLECTIONS.TRAINING_LOGS, log)
     trainingLogs.value.unshift({ ...log, _id: id })
 
-    // 更新动作最大值（延迟获取 userStore，避免循环依赖）
+    // 更新动作最大值
     const userStore = getUserStore()
     for (const ex of log.exercises) {
       if (ex.estimated1RM > 0) {
@@ -395,7 +440,7 @@ export const useTrainingStore = defineStore('training', () => {
     }
 
     // 检查减负周
-    const deloadResult = evaluateDeloadNeed(trainingLogs.value, weekInCycle.value, currentCycleWeek.value)
+    const deloadResult = evaluateDeloadNeed(trainingLogs.value, currentCycleWeek.value, currentCycleWeek.value)
     if (deloadResult.triggers.length > 0) {
       recs.push({
         priority: 4,
@@ -420,6 +465,9 @@ export const useTrainingStore = defineStore('training', () => {
     planStartDate,
     recommendations,
     isLoading,
+    selectedTemplateId,
+    selectedTemplate,
+    hasSelectedTemplate,
     isTraining,
     currentExerciseIndex,
     currentSetIndex,
@@ -429,14 +477,15 @@ export const useTrainingStore = defineStore('training', () => {
     recentLogs,
     totalTrainingDays,
     currentCycleWeek,
-    weekInCycle,
     currentCyclePhase,
+    currentIntensityLabel,
     thisWeekLogs,
     weeklyVolume,
     weeklyAverageRPE,
     init,
     loadTrainingLogs,
     setPlanStartDate,
+    selectTemplate,
     generateTodayPlan,
     updateDayExercises,
     startTraining,

@@ -1,8 +1,9 @@
 export { estimate1RM, calculateWorkingWeight, epleyFormula, brzyckiFormula, rpeAdjusted1RM } from './rm-calculator'
 export { isRPEInRange, getRPEDeviation, generateRPEAdjustment, beginnerRPEToStandard, standardRPEToBeginner, getRPEDescription } from './rpe-manager'
 export {
-  getCyclePhase, calculateIntensityMultiplier, generateDailyPlan,
-  generateWarmupSets, getCycleInfo, getCyclePhaseName
+  getDUPIntensityLevel, calculateIntensityMultiplier, generateDailyPlan,
+  generateWarmupSets, getCycleInfo, getCyclePhaseName, getPhaseColor,
+  getDayInCycle, shouldDeload, getSplitTemplate, getAllSplitTemplates
 } from './dup-engine'
 export { evaluateDeloadNeed } from './deload-detector'
 export { detectPlateau } from './plateau-detector'
