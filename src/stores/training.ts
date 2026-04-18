@@ -287,6 +287,13 @@ export const useTrainingStore = defineStore('training', () => {
         exerciseMaxMap.set(id, (max as any).estimated1RM)
       }
 
+      // 构建训练日配置（提前，因为后面需要用到）
+      const dayConfig: TrainingDayConfig = {
+        dayLabel: splitDay.label,
+        dayType: splitDay.type,
+        exercises: splitDay.exercises,
+      }
+
       // 为没有e1RM数据的动作估算初始重量
       // 优先使用身体数据公式估算，其次使用硬编码默认值
       const userProfile = userStore.profile?.profile
@@ -310,13 +317,6 @@ export const useTrainingStore = defineStore('training', () => {
       // 获取动作库数据
       const exerciseStore = useExerciseStore()
       const exerciseData: Exercise[] = exerciseStore.exercises
-
-      // 构建训练日配置
-      const dayConfig: TrainingDayConfig = {
-        dayLabel: splitDay.label,
-        dayType: splitDay.type,
-        exercises: splitDay.exercises,
-      }
 
       // 判断是否为新手模板
       const isBeginner = template.level === 'beginner'
