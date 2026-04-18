@@ -203,7 +203,21 @@ export const useTrainingStore = defineStore('training', () => {
         exerciseMaxMap.set(id, (max as any).estimated1RM)
       }
 
-      // 为没有e1RM数据的动作设置默认重量
+      // 为没有e1RM数据的动作估算初始重量
+      // 优先使用身体数据公式估算，其次使用硬编码默认值
+      const userProfile = userStore.profile?.profile
+      if (userProfile && userProfile.weight > 0) {
+        // 有身体数据：用公式估算
+        const { estimateAllInitial1RMs } = require('../core/algorithms/body-estimator')
+        const allExerciseIds = dayConfig.exercises.map(e => e.exerciseId)
+        const estimatedMaxes = estimateAllInitial1RMs(allExerciseIds, userProfile)
+        for (const [id, e1rm] of estimatedMaxes.entries()) {
+          if (!exerciseMaxMap.has(id)) {
+            exerciseMaxMap.set(id, e1rm)
+          }
+        }
+      }
+      // 补充：仍没有数据的动作用硬编码默认值
       for (const [id, weight] of Object.entries(DEFAULT_WEIGHTS)) {
         if (!exerciseMaxMap.has(id)) {
           exerciseMaxMap.set(id, weight)
@@ -270,6 +284,18 @@ export const useTrainingStore = defineStore('training', () => {
       const exerciseMaxMap = new Map<string, number>()
       for (const [id, max] of Object.entries(userStore.exerciseMaxes)) {
         exerciseMaxMap.set(id, (max as any).estimated1RM)
+      }
+      // 为没有e1RM数据的动作估算初始重量
+      const userProfile = userStore.profile?.profile
+      if (userProfile && userProfile.weight > 0) {
+        const { estimateAllInitial1RMs } = require('../core/algorithms/body-estimator')
+        const allExerciseIds = exercises.map((e: any) => e.exerciseId)
+        const estimatedMaxes = estimateAllInitial1RMs(allExerciseIds, userProfile)
+        for (const [id, e1rm] of estimatedMaxes.entries()) {
+          if (!exerciseMaxMap.has(id)) {
+            exerciseMaxMap.set(id, e1rm)
+          }
+        }
       }
       for (const [id, weight] of Object.entries(DEFAULT_WEIGHTS)) {
         if (!exerciseMaxMap.has(id)) {

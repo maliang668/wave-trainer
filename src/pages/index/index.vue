@@ -36,6 +36,7 @@
               📋 {{ trainingStore.selectedTemplate.name }}
             </text>
           </view>
+          <text class="estimation-hint" v-if="estimationHint">{{ estimationHint }}</text>
         </view>
 
         <!-- 休息日 -->
@@ -274,6 +275,7 @@ import { useUserStore } from '../../stores/user'
 import { useExerciseStore } from '../../stores/exercise'
 import { getRPEDescription } from '../../core/algorithms/rpe-manager'
 import { getCyclePhaseName, getPhaseColor } from '../../core/algorithms/dup-engine'
+import { getEstimationExplanation } from '../../core/algorithms/body-estimator'
 import { RPE_CONFIG } from '../../core/constants/config'
 import { formatVolume, formatDate } from '../../utils/format'
 import { MUSCLE_GROUP_NAMES } from '../../core/types/exercise'
@@ -290,6 +292,15 @@ const todayDate = formatDate(new Date())
 const phaseColor = computed(() => {
   if (!trainingStore.todayPlan) return '#888'
   return getPhaseColor(trainingStore.todayPlan.cyclePhase)
+})
+
+// 估算说明（新用户显示"基于体重XXkg估算"）
+const estimationHint = computed(() => {
+  const profile = userStore.profile?.profile
+  if (!profile || !profile.weight) return ''
+  // 如果没有任何训练记录，显示估算说明
+  if (trainingStore.trainingLogs.length > 0) return ''
+  return '📊 ' + getEstimationExplanation(profile) + '（训练后自动校准）'
 })
 
 // 最近训练
@@ -705,6 +716,13 @@ onShow(() => {
 .meta-item {
   font-size: 24rpx;
   color: #aaa;
+}
+.estimation-hint {
+  display: block;
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 8rpx;
+  font-style: italic;
 }
 
 /* 休息日 */

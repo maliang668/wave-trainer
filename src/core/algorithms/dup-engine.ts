@@ -207,6 +207,10 @@ export function generateDailyPlan(
     if (e1RM > 0 && planEx.percent1RM > 0) {
       const targetIntensity = planEx.percent1RM * intensityMultiplier
       suggestedWeight = Math.round(e1RM * targetIntensity / 2.5) * 2.5
+      // 新手额外降低10%，留更多余量避免受伤
+      if (isBeginner) {
+        suggestedWeight = Math.round(suggestedWeight * 0.9 / 2.5) * 2.5
+      }
     } else if (e1RM > 0) {
       // 没有配置percent1RM的动作（如平板支撑），使用e1RM作为参考
       suggestedWeight = e1RM
@@ -216,14 +220,20 @@ export function generateDailyPlan(
     let targetRPE = planEx.rpeTarget
     if (isDeloadWeek) {
       targetRPE = Math.min(targetRPE, DUP_CONFIG.intensityLevels.deload.rpeTarget)
-    } else if (!isBeginner && levelConfig && 'rpeTarget' in levelConfig) {
+    } else if (isBeginner) {
+      // 新手：RPE上限为7，避免过度疲劳
+      targetRPE = Math.min(targetRPE, 7)
+    } else if (levelConfig && 'rpeTarget' in levelConfig) {
       // DUP模式：根据强度等级调整RPE
       targetRPE = Math.round(((planEx.rpeTarget + (levelConfig as any).rpeTarget) / 2) * 2) / 2
     }
 
     // 计算目标次数
     let targetReps: [number, number] = [...planEx.repsRange] as [number, number]
-    if (!isBeginner && levelConfig && 'repsModifier' in levelConfig) {
+    if (isBeginner) {
+      // 新手：次数范围统一为8-12，不区分强度等级
+      targetReps = [8, 12]
+    } else if (levelConfig && 'repsModifier' in levelConfig) {
       const mod = (levelConfig as any).repsModifier
       targetReps = [
         Math.max(targetReps[0] + mod, 1),
@@ -239,7 +249,10 @@ export function generateDailyPlan(
 
     // 计算组数
     let sets = planEx.sets
-    if (!isBeginner && levelConfig && 'setsModifier' in levelConfig) {
+    if (isBeginner) {
+      // 新手：减少1组（最少2组），降低总容量
+      sets = Math.max(2, sets - 1)
+    } else if (levelConfig && 'setsModifier' in levelConfig) {
       sets = Math.max(2, sets + (levelConfig as any).setsModifier)
     }
     if (isDeloadWeek) {
