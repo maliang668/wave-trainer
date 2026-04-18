@@ -144,20 +144,25 @@ function insertTestData(days = 30, count = 15) {
     const phaseIndex = i % 3
     const progression = i * 0.5 // 每次训练增加0.5kg
 
-    const exerciseRecords = exercises.map(ex => ({
-      exerciseId: ex.exerciseId,
-      name: ex.name,
-      sets: [{
-        weight: ex.baseWeight + progression,
-        reps: phaseIndex === 2 ? 5 : phaseIndex === 1 ? 8 : 12,
-        rpe: phaseIndex === 2 ? 8.5 : 7,
-      }],
-    }))
+    const exerciseRecords = exercises.map(ex => {
+      const weight = ex.baseWeight + progression
+      const reps = phaseIndex === 2 ? 5 : phaseIndex === 1 ? 8 : 12
+      const rpe = phaseIndex === 2 ? 8.5 : 7
+      const sets = 4
+      const totalVolume = weight * reps * sets
+      return {
+        exerciseId: ex.exerciseId,
+        name: ex.name,
+        sets: Array.from({ length: sets }, () => ({ weight, reps, rpe })),
+        totalVolume,
+        averageRPE: rpe,
+      }
+    })
 
     logs.push({
       date: dateStr,
       exercises: exerciseRecords,
-      totalVolume: 3000 + i * 150,
+      totalVolume: exerciseRecords.reduce((s, ex) => s + ex.totalVolume, 0),
       duration: 45 + Math.floor(Math.random() * 15),
       cyclePhase: phases[phaseIndex],
     } as any)
