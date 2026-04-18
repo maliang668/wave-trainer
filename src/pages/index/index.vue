@@ -39,6 +39,18 @@
           <text class="estimation-hint" v-if="estimationHint">{{ estimationHint }}</text>
         </view>
 
+        <!-- 力量测试入口 -->
+        <view class="card strength-test-entry" v-if="trainingStore.selectedTemplate && trainingStore.trainingLogs.length === 0" @tap="goToStrengthTest">
+          <view class="ste-header">
+            <text class="ste-icon">💪</text>
+            <view class="ste-info">
+              <text class="ste-title">力量测试</text>
+              <text class="ste-desc">测试你的实际力量，让训练重量更准确</text>
+            </view>
+          </view>
+          <text class="ste-arrow">›</text>
+        </view>
+
         <!-- 休息日 -->
         <view class="card rest-card" v-else>
           <text class="rest-emoji">😴</text>
@@ -370,6 +382,11 @@ function getRPEColor(rpe: number): string {
   if (rpe >= 9) return 'text-danger'
   if (rpe >= 8) return 'text-warning'
   return 'text-success'
+}
+
+// 跳转到力量测试
+function goToStrengthTest() {
+  uni.navigateTo({ url: '/pages/strength-test/strength-test' })
 }
 
 // 跳转到模板选择页
@@ -758,6 +775,43 @@ onShow(() => {
   color: #666;
   margin-top: 8rpx;
   font-style: italic;
+}
+
+/* 力量测试入口 */
+.strength-test-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2rpx dashed #ffa726;
+  background: rgba(255, 167, 38, 0.05);
+  margin-bottom: 20rpx;
+}
+.strength-test-entry:active {
+  background: rgba(255, 167, 38, 0.1);
+}
+.ste-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.ste-icon { font-size: 40rpx; }
+.ste-info { flex: 1; }
+.ste-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffa726;
+}
+.ste-desc {
+  display: block;
+  font-size: 22rpx;
+  color: #888;
+  margin-top: 4rpx;
+}
+.ste-arrow {
+  font-size: 36rpx;
+  color: #666;
+  font-weight: 300;
 }
 
 /* 休息日 */

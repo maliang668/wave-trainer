@@ -55,6 +55,14 @@
         "navigationBarBackgroundColor": "#1a1a2e",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/strength-test/strength-test",
+      "style": {
+        "navigationBarTitleText": "力量测试",
+        "navigationBarBackgroundColor": "#1a1a2e",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {
