@@ -10,11 +10,71 @@ import { evaluateDeloadNeed } from '../core/algorithms/deload-detector'
 import { detectPlateau } from '../core/algorithms/plateau-detector'
 import { generateReturnPlan } from '../core/algorithms/return-planner'
 import { assessFatigue } from '../core/algorithms/fatigue-assessor'
-import { estimateAllInitial1RMs } from '../core/algorithms/index'
 import { formatDate, daysBetween } from '../utils/format'
 import { useExerciseStore } from './exercise'
 import type { Exercise } from '../core/types/exercise'
 import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS, CUSTOM_TEMPLATE_STORAGE_KEY } from '../core/constants/config'
+import type { BodyProfile } from '../core/types/user'
+
+// ===== 基于身体数据估算初始1RM（内联，避免额外模块依赖） =====
+const EXERCISE_LBM_COEFFICIENTS: Record<string, { male: number; female: number }> = {
+  squat: { male: 1.0, female: 0.7 },
+  front_squat: { male: 0.85, female: 0.6 },
+  deadlift: { male: 1.2, female: 0.85 },
+  romanian_deadlift: { male: 0.9, female: 0.65 },
+  bench_press: { male: 0.7, female: 0.45 },
+  incline_bench_press: { male: 0.6, female: 0.4 },
+  dumbbell_bench_press: { male: 0.55, female: 0.35 },
+  barbell_row: { male: 0.6, female: 0.4 },
+  lat_pulldown: { male: 0.5, female: 0.35 },
+  cable_row: { male: 0.45, female: 0.3 },
+  overhead_press: { male: 0.45, female: 0.3 },
+  dumbbell_shoulder_press: { male: 0.4, female: 0.25 },
+  barbell_curl: { male: 0.2, female: 0.13 },
+  dumbbell_curl: { male: 0.17, female: 0.11 },
+  hammer_curl: { male: 0.18, female: 0.12 },
+  tricep_pushdown: { male: 0.22, female: 0.14 },
+  overhead_tricep_extension: { male: 0.18, female: 0.12 },
+  close_grip_bench: { male: 0.55, female: 0.35 },
+  lateral_raise: { male: 0.12, female: 0.08 },
+  face_pull: { male: 0.15, female: 0.1 },
+  reverse_fly: { male: 0.13, female: 0.09 },
+  dumbbell_fly: { male: 0.2, female: 0.13 },
+  cable_crossover: { male: 0.18, female: 0.12 },
+  leg_press: { male: 1.2, female: 0.85 },
+  leg_extension: { male: 0.35, female: 0.25 },
+  leg_curl: { male: 0.3, female: 0.2 },
+  hip_thrust: { male: 0.8, female: 0.55 },
+  calf_raise: { male: 0.35, female: 0.25 },
+  plank: { male: 0, female: 0 },
+  push_up: { male: 0.4, female: 0.25 },
+  pull_up: { male: 0.5, female: 0.3 },
+  hanging_leg_raise: { male: 0.25, female: 0.15 },
+}
+
+function estimateAllInitial1RMs(exerciseIds: string[], bodyProfile: BodyProfile): Map<string, number> {
+  const result = new Map<string, number>()
+  if (!bodyProfile.weight || bodyProfile.weight <= 0) return result
+  const gender = bodyProfile.gender || 'male'
+  const bodyFat = bodyProfile.bodyFat
+  const lbm = bodyFat && bodyFat > 0 && bodyFat < 100
+    ? bodyProfile.weight * (1 - bodyFat / 100)
+    : bodyProfile.weight * 0.85
+  let ageModifier = 1
+  if (bodyProfile.age && bodyProfile.age > 30) {
+    ageModifier = Math.max(0.7, 1 - ((bodyProfile.age - 30) / 10) * 0.05)
+  }
+  const menstruationModifier = bodyProfile.isMenstruating ? 0.93 : 1
+  for (const id of exerciseIds) {
+    const coeff = EXERCISE_LBM_COEFFICIENTS[id]
+    if (!coeff) continue
+    const genderCoeff = gender === 'female' ? coeff.female : coeff.male
+    const e1rm = Math.round(lbm * genderCoeff * ageModifier * menstruationModifier / 2.5) * 2.5
+    if (e1rm > 0) result.set(id, e1rm)
+  }
+  return result
+}
+// ===== 内联估算逻辑结束 =====
 
 // 延迟获取 userStore，避免循环依赖
 function getUserStore() {
