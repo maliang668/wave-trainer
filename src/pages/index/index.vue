@@ -13,18 +13,6 @@
         </view>
       </view>
 
-      <!-- 力量测试入口（始终显示） -->
-      <view class="card strength-test-entry" @tap="goToStrengthTest" style="margin-bottom: 24rpx;">
-        <view class="ste-header">
-          <text class="ste-icon">💪</text>
-          <view class="ste-info">
-            <text class="ste-title">力量测试</text>
-            <text class="ste-desc">测试实际力量，让训练重量更准确</text>
-          </view>
-        </view>
-        <text class="ste-arrow">›</text>
-      </view>
-
       <!-- 已选择模板 -->
       <template v-else>
         <!-- 今日计划卡片 -->
@@ -137,6 +125,18 @@
           </view>
         </view>
       </template>
+
+      <!-- 力量测试入口（始终显示） -->
+      <view class="card strength-test-entry" @tap="goToStrengthTest" style="margin-top: 24rpx;">
+        <view class="ste-header">
+          <text class="ste-icon">💪</text>
+          <view class="ste-info">
+            <text class="ste-title">力量测试</text>
+            <text class="ste-desc">测试实际力量，让训练重量更准确</text>
+          </view>
+        </view>
+        <text class="ste-arrow">›</text>
+      </view>
 
       <!-- 最近训练 -->
       <view class="recent-section" v-if="recentLogs.length > 0">
