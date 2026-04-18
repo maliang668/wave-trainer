@@ -145,8 +145,8 @@ function toggleExercise(ex: Exercise) {
 
 // 确认选择
 function confirmSelection() {
-  // 通过 uni 事件总线将选择结果传回上一页
-  uni.$emit('exercisesSelected', selectedIds.value)
+  // 通过全局变量传递选择结果（比 uni.$emit 更可靠）
+  ;(getApp() as any).exercisePickerResult = selectedIds.value
   uni.navigateBack()
 }
 </script>

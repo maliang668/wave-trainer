@@ -255,7 +255,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useTrainingStore } from '../../stores/training'
 import { useUserStore } from '../../stores/user'
@@ -556,28 +556,20 @@ function resetToDefaultPlan() {
   trainingStore.generateTodayPlan()
 }
 
-// 标记是否需要重新生成计划（从其他页面返回时）
-let needRegeneratePlan = true
-
 // 生命周期
 onShow(() => {
-  // 仅在非训练状态且需要时重新生成（避免覆盖用户自定义动作）
-  if (needRegeneratePlan && !trainingStore.isTraining) {
-    trainingStore.generateTodayPlan()
+  if (trainingStore.isTraining) return
+
+  // 检查是否有从动作选择器返回的结果
+  const app = getApp() as any
+  if (app.exercisePickerResult && Array.isArray(app.exercisePickerResult)) {
+    const ids = app.exercisePickerResult
+    app.exercisePickerResult = null // 清除，只用一次
+    onExercisesSelected(ids)
+    return // 不重新生成计划，保留用户选择
   }
-  needRegeneratePlan = true
-})
 
-// 监听动作选择器返回的事件
-uni.$on('exercisesSelected', (ids: string[]) => {
-  // 标记不需要重新生成，防止 onShow 覆盖
-  needRegeneratePlan = false
-  onExercisesSelected(ids)
-})
-
-// 组件卸载时移除监听
-onUnmounted(() => {
-  uni.$off('exercisesSelected')
+  trainingStore.generateTodayPlan()
 })
 </script>
 
