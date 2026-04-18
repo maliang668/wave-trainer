@@ -236,15 +236,15 @@ loadExistingCustom()
 .section-label {
   display: block;
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-bottom: 12rpx;
 }
 .name-input {
-  background: #0f0f23;
-  border: 1rpx solid #3a3a5a;
-  border-radius: 12rpx;
+  background: var(--bg-tertiary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-sm);
   padding: 20rpx 24rpx;
-  color: #e0e0e0;
+  color: var(--text-primary);
   font-size: 32rpx;
 }
 
@@ -258,11 +258,11 @@ loadExistingCustom()
 .section-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 .section-hint {
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 .day-card {
@@ -281,14 +281,14 @@ loadExistingCustom()
 .day-type-badge {
   width: 72rpx;
   height: 72rpx;
-  border-radius: 16rpx;
-  background: rgba(79, 195, 247, 0.15);
+  border-radius: var(--radius-md);
+  background: rgba(10, 132, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .day-type-badge.rest {
-  background: rgba(136, 136, 136, 0.1);
+  background: rgba(142, 142, 147, 0.1);
 }
 .day-type-icon { font-size: 32rpx; }
 .day-info {
@@ -298,18 +298,18 @@ loadExistingCustom()
   display: block;
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 .day-desc {
   display: block;
   font-size: 22rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 4rpx;
 }
 .day-exercises {
   display: block;
   font-size: 22rpx;
-  color: #4fc3f7;
+  color: var(--accent);
   margin-top: 4rpx;
 }
 
@@ -320,8 +320,8 @@ loadExistingCustom()
 .action-btn {
   width: 56rpx;
   height: 56rpx;
-  border-radius: 12rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,14 +330,14 @@ loadExistingCustom()
   opacity: 0.3;
 }
 .action-btn.delete {
-  background: rgba(239, 83, 80, 0.15);
+  background: rgba(255, 69, 58, 0.15);
 }
 .action-icon {
   font-size: 24rpx;
-  color: #ccc;
+  color: var(--text-secondary);
 }
 .action-btn.delete .action-icon {
-  color: #ef5350;
+  color: var(--red);
 }
 
 /* 添加日程 */
@@ -359,32 +359,32 @@ loadExistingCustom()
   align-items: center;
   gap: 6rpx;
   padding: 12rpx 20rpx;
-  border-radius: 24rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
   border: 2rpx solid transparent;
 }
 .type-chip.selected {
-  border-color: #4fc3f7;
-  background: rgba(79, 195, 247, 0.1);
+  border-color: var(--accent);
+  background: rgba(10, 132, 255, 0.1);
 }
 .type-chip.rest.selected {
-  border-color: #888;
-  background: rgba(136, 136, 136, 0.1);
+  border-color: var(--text-secondary);
+  background: rgba(142, 142, 147, 0.1);
 }
 .chip-icon { font-size: 24rpx; }
-.chip-label { font-size: 24rpx; color: #ccc; }
-.type-chip.selected .chip-label { color: #4fc3f7; font-weight: 600; }
-.type-chip.rest.selected .chip-label { color: #aaa; }
+.chip-label { font-size: 24rpx; color: var(--text-secondary); }
+.type-chip.selected .chip-label { color: var(--accent); font-weight: 600; }
+.type-chip.rest.selected .chip-label { color: var(--text-secondary); }
 
 .add-btn {
   width: 100%;
   padding: 20rpx;
   font-size: 28rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-sm);
   text-align: center;
-  background: #2a2a4a;
-  color: #4fc3f7;
-  border: 1rpx solid #3a3a5a;
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border: 1rpx solid var(--separator);
 }
 
 /* 循环预览 */
@@ -403,17 +403,17 @@ loadExistingCustom()
   min-width: 100rpx;
   text-align: center;
   padding: 16rpx 8rpx;
-  border-radius: 12rpx;
-  background: rgba(79, 195, 247, 0.1);
-  border: 1rpx solid rgba(79, 195, 247, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(10, 132, 255, 0.1);
+  border: 1rpx solid rgba(10, 132, 255, 0.2);
 }
 .preview-day.rest {
-  background: rgba(136, 136, 136, 0.08);
-  border-color: rgba(136, 136, 136, 0.15);
+  background: rgba(142, 142, 147, 0.08);
+  border-color: rgba(142, 142, 147, 0.15);
 }
 .preview-icon { display: block; font-size: 28rpx; margin-bottom: 4rpx; }
-.preview-label { display: block; font-size: 22rpx; color: #4fc3f7; font-weight: 600; }
-.preview-day.rest .preview-label { color: #888; }
+.preview-label { display: block; font-size: 22rpx; color: var(--accent); font-weight: 600; }
+.preview-day.rest .preview-label { color: var(--text-secondary); }
 
 /* 保存按钮 */
 .save-wrapper {
@@ -422,14 +422,14 @@ loadExistingCustom()
   left: 0;
   right: 0;
   padding: 24rpx;
-  background: #0f0f23;
-  border-top: 1rpx solid #2a2a4a;
+  background: var(--bg-primary);
+  border-top: 1rpx solid var(--separator);
 }
 .save-btn {
   width: 100%;
   padding: 28rpx;
   font-size: 34rpx;
-  border-radius: 16rpx;
+  border-radius: var(--radius-md);
   text-align: center;
 }
 </style>

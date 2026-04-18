@@ -147,25 +147,25 @@ function goToCustom() {
   display: block;
   font-size: 40rpx;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin-bottom: 8rpx;
 }
 .header-sub {
   display: block;
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 /* 模板卡片 */
 .template-card {
   margin-bottom: 24rpx;
-  border: 2rpx solid #2a2a4a;
+  border: 2rpx solid var(--separator);
   transition: all 0.2s;
 }
 .template-card.selected {
-  border-color: #4fc3f7;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  box-shadow: 0 0 20rpx rgba(79, 195, 247, 0.15);
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 20rpx rgba(10, 132, 255, 0.15);
 }
 
 .template-header {
@@ -177,26 +177,26 @@ function goToCustom() {
 .template-name {
   font-size: 34rpx;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 
 /* 等级标签 */
 .level-badge {
   padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: var(--radius-sm);
   font-size: 22rpx;
 }
 .level-badge.beginner {
-  background: rgba(102, 187, 106, 0.2);
-  color: #66bb6a;
+  background: rgba(48, 209, 88, 0.2);
+  color: var(--green);
 }
 .level-badge.intermediate {
-  background: rgba(255, 167, 38, 0.2);
-  color: #ffa726;
+  background: rgba(255, 159, 10, 0.2);
+  color: var(--orange);
 }
 .level-badge.advanced {
-  background: rgba(239, 83, 80, 0.2);
-  color: #ef5350;
+  background: rgba(255, 69, 58, 0.2);
+  color: var(--red);
 }
 .level-text {
   font-size: 22rpx;
@@ -206,7 +206,7 @@ function goToCustom() {
 .template-desc {
   display: block;
   font-size: 26rpx;
-  color: #aaa;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 16rpx;
 }
@@ -221,12 +221,12 @@ function goToCustom() {
   display: flex;
   align-items: center;
   gap: 6rpx;
-  background: #2a2a4a;
+  background: var(--bg-tertiary);
   padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: var(--radius-sm);
 }
 .tag-icon { font-size: 22rpx; }
-.tag-text { font-size: 22rpx; color: #ccc; }
+.tag-text { font-size: 22rpx; color: var(--text-secondary); }
 
 /* 循环日程可视化 */
 .cycle-visual {
@@ -240,23 +240,23 @@ function goToCustom() {
   min-width: 80rpx;
   text-align: center;
   padding: 10rpx 4rpx;
-  border-radius: 8rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
 }
 .cycle-day.active {
-  background: rgba(79, 195, 247, 0.15);
-  border: 1rpx solid rgba(79, 195, 247, 0.3);
+  background: rgba(10, 132, 255, 0.15);
+  border: 1rpx solid rgba(10, 132, 255, 0.3);
 }
 .cycle-day.rest {
-  background: rgba(136, 136, 136, 0.1);
-  border: 1rpx solid rgba(136, 136, 136, 0.2);
+  background: rgba(142, 142, 147, 0.1);
+  border: 1rpx solid rgba(142, 142, 147, 0.2);
 }
 .cycle-day-label {
   font-size: 20rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 .cycle-day.active .cycle-day-label {
-  color: #4fc3f7;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -266,16 +266,16 @@ function goToCustom() {
   align-items: center;
   gap: 8rpx;
   padding-top: 12rpx;
-  border-top: 1rpx solid #2a2a4a;
+  border-top: 1rpx solid var(--separator);
 }
 .check-icon {
   font-size: 28rpx;
-  color: #4fc3f7;
+  color: var(--accent);
   font-weight: 700;
 }
 .selected-text {
   font-size: 24rpx;
-  color: #4fc3f7;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -286,14 +286,14 @@ function goToCustom() {
   left: 0;
   right: 0;
   padding: 24rpx;
-  background: #0f0f23;
-  border-top: 1rpx solid #2a2a4a;
+  background: var(--bg-primary);
+  border-top: 1rpx solid var(--separator);
 }
 .confirm-btn {
   width: 100%;
   padding: 28rpx;
   font-size: 34rpx;
-  border-radius: 16rpx;
+  border-radius: var(--radius-md);
   text-align: center;
 }
 
@@ -303,11 +303,11 @@ function goToCustom() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24rpx;
-  border: 2rpx dashed #3a3a5a;
-  background: rgba(79, 195, 247, 0.03);
+  border: 2rpx dashed var(--separator-opaque);
+  background: rgba(10, 132, 255, 0.03);
 }
 .custom-entry:active {
-  background: rgba(79, 195, 247, 0.08);
+  background: rgba(10, 132, 255, 0.08);
 }
 .custom-entry-main {
   display: flex;
@@ -322,17 +322,17 @@ function goToCustom() {
   display: block;
   font-size: 32rpx;
   font-weight: 700;
-  color: #4fc3f7;
+  color: var(--accent);
 }
 .custom-entry-desc {
   display: block;
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 4rpx;
 }
 .custom-entry-arrow {
   font-size: 36rpx;
-  color: #666;
+  color: var(--text-tertiary);
   font-weight: 300;
 }
 </style>

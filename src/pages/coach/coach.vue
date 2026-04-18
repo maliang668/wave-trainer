@@ -253,96 +253,96 @@ function saveContext() {
 /* 建议卡片 */
 .recommendations { padding: 0 24rpx; }
 .section-title {
-  font-size: 30rpx; font-weight: 600; color: #e0e0e0;
+  font-size: 30rpx; font-weight: 600; color: var(--text-primary);
   margin: 24rpx 0 16rpx; padding-left: 8rpx;
 }
 .rec-card {
-  margin-bottom: 16rpx; border-left: 4rpx solid #3a3a5a;
+  margin-bottom: 16rpx; border-left: 4rpx solid var(--separator);
 }
-.rec-card.fatigue_warning { border-left-color: #ef5350; }
-.rec-card.plateau_break { border-left-color: #ffa726; }
-.rec-card.deload_reminder { border-left-color: #42a5f5; }
-.rec-card.return_plan { border-left-color: #ab47bc; }
-.rec-card.progress_note { border-left-color: #66bb6a; }
+.rec-card.fatigue_warning { border-left-color: var(--red); }
+.rec-card.plateau_break { border-left-color: var(--orange); }
+.rec-card.deload_reminder { border-left-color: var(--accent); }
+.rec-card.return_plan { border-left-color: var(--accent-secondary); }
+.rec-card.progress_note { border-left-color: var(--green); }
 .rec-header {
   display: flex; align-items: center; gap: 12rpx; margin-bottom: 12rpx;
 }
 .rec-icon { font-size: 32rpx; }
-.rec-title { font-size: 30rpx; font-weight: 600; }
-.rec-message { font-size: 26rpx; color: #ccc; line-height: 1.6; }
+.rec-title { font-size: 30rpx; font-weight: 600; color: var(--text-primary); }
+.rec-message { font-size: 26rpx; color: var(--text-secondary); line-height: 1.6; }
 .rec-actions {
   display: flex; gap: 12rpx; margin-top: 16rpx;
 }
 .btn-sm {
-  padding: 12rpx 24rpx; font-size: 24rpx; border-radius: 8rpx;
+  padding: 12rpx 24rpx; font-size: 24rpx; border-radius: var(--radius-sm);
 }
 .empty-rec {
   text-align: center; padding: 40rpx 24rpx;
 }
-.empty-rec-text { display: block; font-size: 28rpx; color: #66bb6a; }
-.empty-rec-sub { display: block; font-size: 24rpx; color: #666; margin-top: 8rpx; }
+.empty-rec-text { display: block; font-size: 28rpx; color: var(--green); }
+.empty-rec-sub { display: block; font-size: 24rpx; color: var(--text-tertiary); margin-top: 8rpx; }
 
 /* 疲劳评估 */
 .fatigue-card { margin: 0 24rpx 16rpx; }
 .fatigue-score {
   display: flex; align-items: center; gap: 20rpx;
-  padding: 24rpx; border-radius: 12rpx; margin-bottom: 16rpx;
+  padding: 24rpx; border-radius: var(--radius-sm); margin-bottom: 16rpx;
 }
-.fatigue-score.low { background: rgba(102,187,106,0.1); }
-.fatigue-score.moderate { background: rgba(255,167,38,0.1); }
-.fatigue-score.high { background: rgba(239,83,80,0.1); }
+.fatigue-score.low { background: rgba(48,209,88,0.1); }
+.fatigue-score.moderate { background: rgba(255,159,10,0.1); }
+.fatigue-score.high { background: rgba(255,69,58,0.1); }
 .fatigue-number { font-size: 56rpx; font-weight: 700; }
-.fatigue-score.low .fatigue-number { color: #66bb6a; }
-.fatigue-score.moderate .fatigue-number { color: #ffa726; }
-.fatigue-score.high .fatigue-number { color: #ef5350; }
-.fatigue-label { font-size: 28rpx; color: #ccc; }
+.fatigue-score.low .fatigue-number { color: var(--green); }
+.fatigue-score.moderate .fatigue-number { color: var(--orange); }
+.fatigue-score.high .fatigue-number { color: var(--red); }
+.fatigue-label { font-size: 28rpx; color: var(--text-secondary); }
 .fatigue-advice {
-  display: block; font-size: 26rpx; color: #aaa;
+  display: block; font-size: 26rpx; color: var(--text-secondary);
   line-height: 1.6; margin-bottom: 16rpx;
 }
-.fatigue-metrics { padding-top: 16rpx; border-top: 1rpx solid #2a2a4a; }
+.fatigue-metrics { padding-top: 16rpx; border-top: 1rpx solid var(--separator); }
 .metric-row {
   display: flex; justify-content: space-between;
   padding: 10rpx 0;
 }
-.metric-label { font-size: 26rpx; color: #888; }
+.metric-label { font-size: 26rpx; color: var(--text-secondary); }
 .metric-value { font-size: 26rpx; font-weight: 600; }
 
 /* 情境记录 */
 .context-card { margin: 0 24rpx 16rpx; }
 .context-sub {
-  display: block; font-size: 24rpx; color: #666;
+  display: block; font-size: 24rpx; color: var(--text-tertiary);
   margin-bottom: 24rpx;
 }
 .context-item {
   display: flex; justify-content: space-between;
   align-items: center; margin-bottom: 20rpx;
 }
-.context-label { font-size: 28rpx; }
+.context-label { font-size: 28rpx; color: var(--text-primary); }
 .star-rating { display: flex; gap: 8rpx; }
 .star {
-  font-size: 36rpx; color: #3a3a5a;
+  font-size: 36rpx; color: var(--separator-opaque);
   transition: color 0.2s;
 }
-.star.filled { color: #ffc107; }
+.star.filled { color: var(--orange); }
 .save-context-btn {
   margin-top: 16rpx; width: 100%; padding: 20rpx;
-  font-size: 28rpx; border-radius: 12rpx; text-align: center;
+  font-size: 28rpx; border-radius: var(--radius-sm); text-align: center;
 }
 
 /* 停训回归 */
 .return-plan-card { margin: 0 24rpx 16rpx; }
 .return-week {
-  padding: 16rpx 0; border-bottom: 1rpx solid #2a2a4a;
+  padding: 16rpx 0; border-bottom: 1rpx solid var(--separator);
 }
 .return-week:last-of-type { border-bottom: none; }
 .rw-header { margin-bottom: 8rpx; }
-.rw-phase { font-size: 26rpx; color: #4fc3f7; font-weight: 600; }
+.rw-phase { font-size: 26rpx; color: var(--accent); font-weight: 600; }
 .rw-details { display: flex; gap: 24rpx; }
-.rw-detail { font-size: 24rpx; color: #888; }
+.rw-detail { font-size: 24rpx; color: var(--text-secondary); }
 .return-note {
   display: block; margin-top: 16rpx; padding: 16rpx;
-  background: rgba(79,195,247,0.1); border-radius: 8rpx;
-  font-size: 24rpx; color: #4fc3f7; line-height: 1.6;
+  background: rgba(10,132,255,0.1); border-radius: var(--radius-sm);
+  font-size: 24rpx; color: var(--accent); line-height: 1.6;
 }
 </style>

@@ -209,7 +209,7 @@
         <text class="setting-label">自动计算热身组</text>
         <switch
           :checked="userStore.profile?.preferences.enableWarmupCalc ?? true"
-          color="#4fc3f7"
+          color="#0A84FF"
           @change="toggleWarmup"
         />
       </view>
@@ -457,24 +457,24 @@ function confirmClearData() {
 /* 用户卡片 */
 .user-card {
   display: flex; align-items: center; gap: 24rpx;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 1rpx solid #2a2a4a;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
 }
 .user-avatar {
   width: 100rpx; height: 100rpx; border-radius: 50%;
-  background: linear-gradient(135deg, #4fc3f7, #0288d1);
+  background: var(--gradient-primary);
   display: flex; align-items: center; justify-content: center;
 }
 .avatar-text {
-  font-size: 40rpx; font-weight: 700; color: white;
+  font-size: 40rpx; font-weight: 700; color: var(--text-primary);
 }
 .user-info { flex: 1; }
-.user-name { display: block; font-size: 34rpx; font-weight: 700; }
-.user-stats { display: block; font-size: 24rpx; color: #888; margin-top: 4rpx; }
+.user-name { display: block; font-size: 34rpx; font-weight: 700; color: var(--text-primary); }
+.user-stats { display: block; font-size: 24rpx; color: var(--text-secondary); margin-top: 4rpx; }
 
 /* 通用 */
 .section-title {
-  font-size: 30rpx; font-weight: 600; color: #e0e0e0;
+  font-size: 30rpx; font-weight: 600; color: var(--text-primary);
   margin-bottom: 20rpx; padding-left: 8rpx;
 }
 
@@ -484,54 +484,54 @@ function confirmClearData() {
   display: flex; justify-content: space-between;
   align-items: center; margin-bottom: 20rpx;
 }
-.form-label { font-size: 28rpx; color: #ccc; }
+.form-label { font-size: 28rpx; color: var(--text-secondary); }
 .form-input-group {
   display: flex; align-items: center; gap: 8rpx;
 }
 .form-input {
-  background: #0f0f23; border: 1rpx solid #3a3a5a;
-  border-radius: 8rpx; padding: 12rpx 16rpx;
-  color: #e0e0e0; font-size: 28rpx; text-align: right;
+  background: var(--bg-tertiary); border: 1rpx solid var(--separator);
+  border-radius: var(--radius-sm); padding: 12rpx 16rpx;
+  color: var(--text-primary); font-size: 28rpx; text-align: right;
   width: 200rpx;
 }
 .form-input.small { width: 100rpx; padding: 8rpx 12rpx; font-size: 26rpx; }
-.form-unit { font-size: 24rpx; color: #888; }
+.form-unit { font-size: 24rpx; color: var(--text-secondary); }
 .save-body-btn {
   width: 100%; padding: 20rpx; font-size: 28rpx;
-  border-radius: 12rpx; text-align: center; margin-top: 8rpx;
+  border-radius: var(--radius-sm); text-align: center; margin-top: 8rpx;
 }
 
 /* 身体数据历史 */
-.body-history { margin-top: 24rpx; padding-top: 16rpx; border-top: 1rpx solid #2a2a4a; }
-.history-title { font-size: 24rpx; color: #888; margin-bottom: 12rpx; display: block; }
+.body-history { margin-top: 24rpx; padding-top: 16rpx; border-top: 1rpx solid var(--separator); }
+.history-title { font-size: 24rpx; color: var(--text-secondary); margin-bottom: 12rpx; display: block; }
 .history-row {
   display: flex; gap: 24rpx; padding: 8rpx 0;
-  font-size: 26rpx; color: #aaa;
+  font-size: 26rpx; color: var(--text-secondary);
 }
 .history-date { flex: 1; }
-.history-weight { color: #4fc3f7; font-weight: 600; }
-.history-fat { color: #ffa726; }
+.history-weight { color: var(--accent); font-weight: 600; }
+.history-fat { color: var(--orange); }
 
 /* 设置行 */
 .setting-row {
   display: flex; justify-content: space-between;
   align-items: center; padding: 20rpx 0;
-  border-bottom: 1rpx solid #1f1f3a;
+  border-bottom: 1rpx solid var(--separator);
 }
 .setting-row:last-child { border-bottom: none; }
-.setting-label { font-size: 28rpx; color: #e0e0e0; }
+.setting-label { font-size: 28rpx; color: var(--text-primary); }
 .setting-value {
   display: flex; align-items: center; gap: 8rpx;
-  font-size: 26rpx; color: #888;
+  font-size: 26rpx; color: var(--text-secondary);
 }
-.setting-info { font-size: 26rpx; color: #4fc3f7; }
-.setting-arrow { font-size: 32rpx; color: #555; }
+.setting-info { font-size: 26rpx; color: var(--accent); }
+.setting-arrow { font-size: 32rpx; color: var(--text-tertiary); }
 
 /* 关于 */
 .about-card { text-align: center; padding: 40rpx 24rpx; }
-.app-name { display: block; font-size: 36rpx; font-weight: 700; color: #4fc3f7; }
-.app-version { display: block; font-size: 24rpx; color: #666; margin-top: 4rpx; }
-.app-desc { display: block; font-size: 24rpx; color: #888; margin-top: 8rpx; }
+.app-name { display: block; font-size: 36rpx; font-weight: 700; color: var(--accent); }
+.app-version { display: block; font-size: 24rpx; color: var(--text-tertiary); margin-top: 4rpx; }
+.app-desc { display: block; font-size: 24rpx; color: var(--text-secondary); margin-top: 8rpx; }
 
 /* 性别选择 */
 .gender-group {
@@ -540,14 +540,14 @@ function confirmClearData() {
 }
 .gender-tag {
   padding: 10rpx 28rpx;
-  border-radius: 20rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 .gender-tag.active {
-  background: rgba(79, 195, 247, 0.2);
-  color: #4fc3f7;
+  background: rgba(10, 132, 255, 0.15);
+  color: var(--accent);
   font-weight: 600;
 }
 </style>

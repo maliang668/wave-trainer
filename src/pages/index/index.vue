@@ -247,8 +247,8 @@
                 :max="10"
                 :step="0.5"
                 :value="currentRPE"
-                activeColor="#4fc3f7"
-                backgroundColor="#2a2a4a"
+                activeColor="#0A84FF"
+                backgroundColor="#2C2C2E"
                 block-size="20"
                 @change="onRPEChange"
               />
@@ -744,32 +744,57 @@ onShow(() => {
 /* 引导卡片 */
 .onboard-card {
   text-align: center;
-  padding: 60rpx 32rpx;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 1rpx solid #2a2a4a;
+  padding: 80rpx 48rpx;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
 }
-.onboard-emoji { font-size: 80rpx; display: block; margin-bottom: 16rpx; }
-.onboard-title { display: block; font-size: 36rpx; font-weight: 700; color: #e0e0e0; margin-bottom: 16rpx; }
-.onboard-desc { display: block; font-size: 26rpx; color: #aaa; line-height: 1.8; margin-bottom: 32rpx; }
+.onboard-emoji {
+  font-size: 100rpx;
+  display: block;
+  margin-bottom: 24rpx;
+}
+.onboard-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+  letter-spacing: 0.5rpx;
+}
+.onboard-desc {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 48rpx;
+}
 .onboard-btn {
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
-  padding: 28rpx;
-  font-size: 32rpx;
-  border-radius: 16rpx;
+  padding: 32rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
   text-align: center;
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-md);
 }
 
 /* 计划卡片 */
 .plan-card {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 1rpx solid #2a2a4a;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 .plan-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
 }
 .plan-title {
   display: flex;
@@ -777,16 +802,17 @@ onShow(() => {
   gap: 12rpx;
 }
 .phase-tag {
-  font-size: 24rpx;
-  padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  font-size: 22rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
   font-weight: 600;
-  color: white;
+  color: #FFFFFF;
+  background: var(--accent);
 }
 .plan-week {
-  font-size: 28rpx;
-  color: #e0e0e0;
-  font-weight: 600;
+  font-size: 30rpx;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 .plan-header-right {
   display: flex;
@@ -796,26 +822,28 @@ onShow(() => {
 }
 .plan-date {
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-tertiary);
 }
 .switch-plan {
   font-size: 22rpx;
-  color: #4fc3f7;
-  padding: 4rpx 12rpx;
+  color: var(--accent);
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(10, 132, 255, 0.1);
 }
 .plan-meta {
   display: flex;
-  gap: 24rpx;
+  gap: 20rpx;
   flex-wrap: wrap;
 }
 .meta-item {
-  font-size: 24rpx;
-  color: #aaa;
+  font-size: 22rpx;
+  color: var(--text-secondary);
 }
 .estimation-hint {
   display: block;
   font-size: 22rpx;
-  color: #666;
+  color: var(--text-tertiary);
   margin-top: 8rpx;
   font-style: italic;
 }
@@ -825,12 +853,14 @@ onShow(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2rpx dashed #ffa726;
-  background: rgba(255, 167, 38, 0.05);
+  border: 2rpx dashed var(--orange);
+  background: rgba(255, 159, 10, 0.06);
   margin-bottom: 20rpx;
+  border-radius: var(--radius-md);
+  padding: 24rpx;
 }
 .strength-test-entry:active {
-  background: rgba(255, 167, 38, 0.1);
+  background: rgba(255, 159, 10, 0.12);
 }
 .ste-header {
   display: flex;
@@ -843,50 +873,71 @@ onShow(() => {
   display: block;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ffa726;
+  color: var(--orange);
 }
 .ste-desc {
   display: block;
   font-size: 22rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 4rpx;
 }
 .ste-arrow {
   font-size: 36rpx;
-  color: #666;
+  color: var(--text-tertiary);
   font-weight: 300;
 }
 
 /* 休息日 */
 .rest-card {
   text-align: center;
-  padding: 60rpx 24rpx;
+  padding: 80rpx 48rpx;
 }
-.rest-emoji { font-size: 80rpx; }
-.rest-text { display: block; font-size: 36rpx; font-weight: 600; margin-top: 16rpx; }
-.rest-sub { display: block; font-size: 26rpx; color: #888; margin-top: 8rpx; }
+.rest-emoji {
+  font-size: 80rpx;
+  opacity: 0.8;
+}
+.rest-text {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-top: 20rpx;
+  color: var(--text-primary);
+}
+.rest-sub {
+  display: block;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  margin-top: 8rpx;
+}
 .rest-actions {
   display: flex;
-  gap: 16rpx;
-  margin-top: 24rpx;
+  gap: 20rpx;
+  margin-top: 36rpx;
   justify-content: center;
 }
 .rest-switch-btn {
-  padding: 16rpx 32rpx;
-  font-size: 26rpx;
-  border-radius: 12rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  border-radius: var(--radius-lg);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 500;
 }
 .rest-train-btn {
-  padding: 16rpx 32rpx;
-  font-size: 26rpx;
-  border-radius: 12rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 /* 动作列表 */
 .section-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin: 32rpx 0 16rpx;
   padding-left: 8rpx;
 }
@@ -898,10 +949,13 @@ onShow(() => {
 .btn-sm {
   padding: 12rpx 24rpx;
   font-size: 24rpx;
-  border-radius: 8rpx;
+  border-radius: 999rpx;
 }
 .exercise-card {
-  border-left: 6rpx solid #4fc3f7;
+  border-left: none;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-lg);
 }
 .ex-header {
   display: flex;
@@ -910,8 +964,9 @@ onShow(() => {
   margin-bottom: 16rpx;
 }
 .ex-name {
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 .ex-header-right {
   display: flex;
@@ -920,19 +975,19 @@ onShow(() => {
 }
 .ex-muscle {
   font-size: 22rpx;
-  color: #888;
-  background: #2a2a4a;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
 }
 .ex-action-btns {
   display: flex;
   gap: 8rpx;
 }
 .ex-btn {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 12rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -940,26 +995,28 @@ onShow(() => {
   font-weight: 700;
 }
 .ex-btn.insert {
-  background: rgba(79, 195, 247, 0.15);
-  color: #4fc3f7;
+  background: rgba(10, 132, 255, 0.12);
+  color: var(--accent);
 }
 .ex-btn.remove {
-  background: rgba(239, 83, 80, 0.15);
-  color: #ef5350;
+  background: rgba(255, 69, 58, 0.12);
+  color: var(--red);
 }
 .add-exercise-bottom {
   width: 100%;
-  padding: 20rpx;
+  padding: 24rpx;
   text-align: center;
   font-size: 28rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   margin-top: 16rpx;
-  border: 2rpx dashed #3a3a5a;
-  color: #4fc3f7;
+  border: 2rpx dashed var(--separator);
+  color: var(--accent);
+  font-weight: 500;
 }
 .ex-details {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8rpx;
 }
 .ex-detail-item {
   text-align: center;
@@ -967,32 +1024,34 @@ onShow(() => {
 .detail-label {
   display: block;
   font-size: 22rpx;
-  color: #888;
+  color: var(--text-tertiary);
   margin-bottom: 4rpx;
 }
 .detail-value {
   font-size: 30rpx;
   font-weight: 600;
+  color: var(--text-primary);
 }
 .detail-hint {
   display: block;
   font-size: 18rpx;
-  color: #666;
+  color: var(--text-tertiary);
   margin-top: 2rpx;
 }
 .warmup-section {
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #2a2a4a;
+  border-top: 1rpx solid var(--separator);
 }
 .warmup-title {
   font-size: 24rpx;
-  color: #ffa726;
+  color: var(--orange);
   margin-bottom: 8rpx;
+  font-weight: 500;
 }
 .warmup-set {
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
   line-height: 1.8;
 }
 
@@ -1002,28 +1061,41 @@ onShow(() => {
 }
 .start-btn {
   width: 100%;
-  padding: 28rpx;
-  font-size: 34rpx;
-  border-radius: 16rpx;
+  padding: 36rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-md);
+  letter-spacing: 1rpx;
 }
 
 /* 最近训练 */
 .log-card {
-  border-left: 4rpx solid #3a3a5a;
+  border-left: none;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-lg);
 }
 .log-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 12rpx;
 }
 .log-date {
   font-size: 28rpx;
   font-weight: 600;
+  color: var(--text-primary);
 }
 .log-phase {
   font-size: 22rpx;
-  padding: 2rpx 12rpx;
-  border-radius: 6rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 500;
 }
 .log-exercises {
   display: flex;
@@ -1033,20 +1105,21 @@ onShow(() => {
 }
 .log-ex-name {
   font-size: 24rpx;
-  color: #ccc;
-  background: #2a2a4a;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
 }
 .log-ex-rpe {
   margin-left: 8rpx;
   font-size: 22rpx;
+  color: var(--text-tertiary);
 }
 .log-stats {
   display: flex;
   gap: 24rpx;
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 /* 训练执行模式 */
@@ -1055,33 +1128,37 @@ onShow(() => {
 }
 .training-progress {
   padding: 16rpx 24rpx;
-  background: #1a1a2e;
+  background: var(--bg-secondary);
   position: sticky;
   top: 0;
   z-index: 10;
+  border-bottom: 1rpx solid var(--separator);
 }
 .progress-bar {
-  height: 8rpx;
-  background: #2a2a4a;
-  border-radius: 4rpx;
+  height: 6rpx;
+  background: var(--bg-tertiary);
+  border-radius: 3rpx;
   overflow: hidden;
   margin-bottom: 8rpx;
 }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4fc3f7, #0288d1);
-  border-radius: 4rpx;
+  background: var(--accent);
+  border-radius: 3rpx;
   transition: width 0.3s;
 }
 .progress-text {
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
   text-align: center;
 }
 
 /* 当前动作 */
 .current-exercise {
-  border-left: 6rpx solid #4fc3f7;
+  border-left: none;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-lg);
 }
 .current-ex-header {
   display: flex;
@@ -1090,13 +1167,14 @@ onShow(() => {
   margin-bottom: 24rpx;
 }
 .current-ex-name {
-  font-size: 36rpx;
+  font-size: 40rpx;
   font-weight: 700;
+  color: var(--text-primary);
 }
 .current-ex-target {
   font-size: 26rpx;
-  color: #ffa726;
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* 已完成的组 */
@@ -1108,20 +1186,22 @@ onShow(() => {
   justify-content: space-between;
   padding: 8rpx 0;
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 /* 输入区域 */
 .set-input-area {
-  background: #0f0f23;
-  border-radius: 12rpx;
-  padding: 24rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
   margin-top: 16rpx;
+  border: 1rpx solid var(--separator);
+  box-shadow: var(--shadow-sm);
 }
 .set-label {
   font-size: 30rpx;
   font-weight: 600;
-  color: #4fc3f7;
+  color: var(--accent);
   margin-bottom: 20rpx;
   display: block;
 }
@@ -1136,7 +1216,7 @@ onShow(() => {
 .input-label {
   display: block;
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-bottom: 8rpx;
 }
 .weight-input {
@@ -1145,20 +1225,22 @@ onShow(() => {
   gap: 8rpx;
 }
 .weight-btn {
-  background: #2a2a4a;
-  color: #4fc3f7;
+  background: var(--bg-secondary);
+  color: var(--accent);
   font-size: 22rpx;
-  padding: 8rpx 12rpx;
-  border-radius: 8rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
   min-width: 80rpx;
   text-align: center;
+  border: 1rpx solid var(--separator);
+  font-weight: 500;
 }
 .weight-field, .reps-field {
-  background: #1a1a2e;
-  border: 1rpx solid #3a3a5a;
-  border-radius: 8rpx;
-  padding: 12rpx 16rpx;
-  color: #e0e0e0;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--separator);
+  border-radius: var(--radius-md);
+  padding: 14rpx 16rpx;
+  color: var(--text-primary);
   font-size: 30rpx;
   text-align: center;
   flex: 1;
@@ -1173,23 +1255,33 @@ onShow(() => {
 }
 .rpe-beginner {
   display: flex;
-  gap: 16rpx;
+  gap: 12rpx;
   margin-top: 12rpx;
 }
 .rpe-level-btn {
   flex: 1;
   text-align: center;
   padding: 16rpx;
-  background: #1a1a2e;
-  border: 2rpx solid #3a3a5a;
-  border-radius: 12rpx;
+  background: var(--bg-secondary);
+  border: 2rpx solid var(--separator);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
 }
 .rpe-level-btn.active {
-  border-color: #4fc3f7;
-  background: rgba(79, 195, 247, 0.1);
+  border-color: var(--accent);
+  background: rgba(10, 132, 255, 0.1);
+  box-shadow: 0 0 0 2rpx rgba(10, 132, 255, 0.2);
 }
-.rpe-emoji { font-size: 36rpx; display: block; }
-.rpe-label { font-size: 24rpx; color: #ccc; display: block; margin-top: 4rpx; }
+.rpe-emoji {
+  font-size: 36rpx;
+  display: block;
+}
+.rpe-label {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 4rpx;
+}
 .rpe-advanced {
   margin-top: 12rpx;
   padding: 0 8rpx;
@@ -1198,7 +1290,7 @@ onShow(() => {
   display: block;
   text-align: center;
   font-size: 28rpx;
-  color: #4fc3f7;
+  color: var(--accent);
   font-weight: 600;
   margin-top: 8rpx;
 }
@@ -1206,20 +1298,34 @@ onShow(() => {
 /* 完成按钮 */
 .complete-btn {
   width: 100%;
-  padding: 24rpx;
+  padding: 28rpx;
   font-size: 32rpx;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-md);
 }
 
 /* RPE建议 */
 .advice-card {
   margin-top: 16rpx;
-  padding: 16rpx;
-  border-radius: 8rpx;
+  padding: 20rpx;
+  border-radius: var(--radius-md);
   font-size: 24rpx;
+  border-left: none;
 }
-.advice-increase { background: rgba(102, 187, 106, 0.1); border-left: 4rpx solid #66bb6a; }
-.advice-decrease { background: rgba(255, 167, 38, 0.1); border-left: 4rpx solid #ffa726; }
-.advice-text { color: #ccc; }
+.advice-increase {
+  background: rgba(48, 209, 88, 0.08);
+  border: 1rpx solid rgba(48, 209, 88, 0.2);
+}
+.advice-decrease {
+  background: rgba(255, 159, 10, 0.08);
+  border: 1rpx solid rgba(255, 159, 10, 0.2);
+}
+.advice-text {
+  color: var(--text-secondary);
+}
 
 /* 计时器 */
 .timer-card {
@@ -1228,17 +1334,18 @@ onShow(() => {
 }
 .timer-label {
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 12rpx;
 }
 .timer-display {
-  font-size: 72rpx;
+  font-size: 80rpx;
   font-weight: 700;
-  color: #4fc3f7;
+  color: var(--accent);
   display: block;
   margin-bottom: 24rpx;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 2rpx;
 }
 .timer-controls {
   display: flex;
@@ -1251,7 +1358,12 @@ onShow(() => {
 }
 .finish-btn {
   width: 100%;
-  padding: 24rpx;
+  padding: 28rpx;
   font-size: 30rpx;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-md);
 }
 </style>

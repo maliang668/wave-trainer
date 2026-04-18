@@ -281,7 +281,7 @@ function goBack() {
   padding: 24rpx;
   padding-bottom: 160rpx;
   min-height: 100vh;
-  background: #0f0f23;
+  background: var(--bg-primary);
 }
 .header {
   margin-bottom: 32rpx;
@@ -291,42 +291,42 @@ function goBack() {
   display: block;
   font-size: 40rpx;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin-bottom: 8rpx;
 }
 .header-sub {
   display: block;
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 .section-title {
   display: block;
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
   margin-top: 24rpx;
 }
 
 /* Tips */
 .rm-tips {
-  background: #1a1a2e;
-  border-radius: 16rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
   padding: 24rpx;
   margin-bottom: 24rpx;
-  border-left: 6rpx solid #4fc3f7;
+  border-left: 6rpx solid var(--accent);
 }
 .tips-title {
   display: block;
   font-size: 28rpx;
   font-weight: 600;
-  color: #4fc3f7;
+  color: var(--accent);
   margin-bottom: 8rpx;
 }
 .tips-text {
   display: block;
   font-size: 24rpx;
-  color: #aaa;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin-top: 4rpx;
 }
@@ -337,11 +337,11 @@ function goBack() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16rpx;
-  border: 2rpx solid #2a2a4a;
+  border: 2rpx solid var(--separator);
 }
 .exercise-select-card.selected {
-  border-color: #4fc3f7;
-  background: rgba(79, 195, 247, 0.05);
+  border-color: var(--accent);
+  background: rgba(10, 132, 255, 0.05);
 }
 .ex-info {
   flex: 1;
@@ -350,19 +350,19 @@ function goBack() {
   display: block;
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 .ex-muscle {
   display: block;
   font-size: 22rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-top: 4rpx;
 }
 .check-box {
   width: 44rpx;
   height: 44rpx;
-  border-radius: 12rpx;
-  border: 2rpx solid #3a3a5a;
+  border-radius: var(--radius-sm);
+  border: 2rpx solid var(--separator-opaque);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -370,9 +370,9 @@ function goBack() {
   color: transparent;
 }
 .check-box.checked {
-  background: #4fc3f7;
-  border-color: #4fc3f7;
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-primary);
 }
 
 /* RM selector */
@@ -380,7 +380,7 @@ function goBack() {
   display: block;
   font-size: 28rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
 }
 .rm-selector {
@@ -392,21 +392,21 @@ function goBack() {
   flex: 1;
   padding: 16rpx;
   text-align: center;
-  border-radius: 12rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
   font-size: 28rpx;
-  color: #888;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 .rm-tag.active {
-  background: rgba(79, 195, 247, 0.15);
-  color: #4fc3f7;
-  border: 1rpx solid rgba(79, 195, 247, 0.3);
+  background: rgba(10, 132, 255, 0.15);
+  color: var(--accent);
+  border: 1rpx solid rgba(10, 132, 255, 0.3);
 }
 .rm-tip {
   display: block;
   font-size: 22rpx;
-  color: #ffa726;
+  color: var(--orange);
   margin-top: 8rpx;
 }
 
@@ -419,20 +419,20 @@ function goBack() {
 .input-label {
   width: 100rpx;
   font-size: 28rpx;
-  color: #aaa;
+  color: var(--text-secondary);
 }
 .input-field {
   flex: 1;
-  background: #2a2a4a;
-  border-radius: 12rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
   padding: 16rpx 20rpx;
   font-size: 28rpx;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin: 0 12rpx;
 }
 .input-unit {
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
   width: 60rpx;
 }
 
@@ -446,43 +446,43 @@ function goBack() {
 }
 .rpe-tag {
   padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-  background: #2a2a4a;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
 }
 .rpe-tag.active {
-  background: rgba(79, 195, 247, 0.15);
-  color: #4fc3f7;
+  background: rgba(10, 132, 255, 0.15);
+  color: var(--accent);
 }
 
 /* Result card */
 .result-card {
   text-align: center;
   padding: 32rpx;
-  border: 2rpx solid #4fc3f7;
-  background: rgba(79, 195, 247, 0.05);
+  border: 2rpx solid var(--accent);
+  background: rgba(10, 132, 255, 0.05);
 }
 .result-label {
   display: block;
   font-size: 26rpx;
-  color: #888;
+  color: var(--text-secondary);
   margin-bottom: 8rpx;
 }
 .result-value {
   display: block;
   font-size: 56rpx;
   font-weight: 700;
-  color: #4fc3f7;
+  color: var(--accent);
   margin-bottom: 8rpx;
 }
 .result-confidence {
   display: block;
   font-size: 24rpx;
 }
-.result-confidence.high { color: #66bb6a; }
-.result-confidence.medium { color: #ffa726; }
-.result-confidence.low { color: #ef5350; }
+.result-confidence.high { color: var(--green); }
+.result-confidence.medium { color: var(--orange); }
+.result-confidence.low { color: var(--red); }
 
 /* Summary result */
 .result-row {
@@ -494,17 +494,17 @@ function goBack() {
 .result-name {
   font-size: 30rpx;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 .result-e1rm {
   font-size: 34rpx;
   font-weight: 700;
-  color: #4fc3f7;
+  color: var(--accent);
 }
 .result-method {
   display: block;
   font-size: 22rpx;
-  color: #666;
+  color: var(--text-tertiary);
   margin-top: 4rpx;
 }
 
@@ -522,33 +522,33 @@ function goBack() {
   flex: 1;
   padding: 24rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: var(--radius-sm);
   font-size: 28rpx;
 }
 
 /* Global card style */
 .card {
-  background: #1a1a2e;
-  border-radius: 16rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
   padding: 24rpx;
   margin-bottom: 20rpx;
 }
 
 /* Button styles (matching app global) */
 .btn-primary {
-  background: linear-gradient(135deg, #4fc3f7, #0288d1);
-  color: #fff;
+  background: var(--gradient-primary);
+  color: var(--text-primary);
   padding: 24rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-sm);
   text-align: center;
   font-size: 30rpx;
   font-weight: 600;
 }
 .btn-secondary {
-  background: #2a2a4a;
-  color: #ccc;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
   padding: 24rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-sm);
   text-align: center;
   font-size: 30rpx;
 }

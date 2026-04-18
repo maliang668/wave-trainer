@@ -222,8 +222,8 @@ function clearAllData() {
 .debug-panel {
   width: 100%;
   max-height: 80vh;
-  background: #1a1a2e;
-  border-radius: 24rpx 24rpx 0 0;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: 32rpx;
   overflow-y: auto;
 }
@@ -233,29 +233,29 @@ function clearAllData() {
   align-items: center;
   margin-bottom: 24rpx;
   padding-bottom: 16rpx;
-  border-bottom: 1rpx solid #2a2a4a;
+  border-bottom: 1rpx solid var(--separator);
 }
 .debug-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #ef5350;
+  color: var(--red);
 }
 .debug-close {
   font-size: 32rpx;
-  color: #888;
+  color: var(--text-secondary);
   padding: 8rpx 16rpx;
 }
 .debug-section {
   margin-bottom: 24rpx;
   padding: 20rpx;
-  background: #0f0f23;
-  border-radius: 12rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
 }
 .section-label {
   display: block;
   font-size: 26rpx;
   font-weight: 600;
-  color: #aaa;
+  color: var(--text-secondary);
   margin-bottom: 12rpx;
 }
 .debug-row {
@@ -266,28 +266,28 @@ function clearAllData() {
 }
 .debug-input {
   flex: 1;
-  background: #2a2a4a;
-  border-radius: 8rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
   padding: 12rpx 16rpx;
   font-size: 26rpx;
-  color: #e0e0e0;
+  color: var(--text-primary);
 }
 .debug-info {
   font-size: 24rpx;
-  color: #888;
+  color: var(--text-secondary);
   word-break: break-all;
 }
 .debug-btn {
   padding: 12rpx 20rpx;
-  background: #2a2a4a;
-  border-radius: 8rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
   margin-bottom: 8rpx;
 }
 .debug-btn text {
   font-size: 24rpx;
-  color: #4fc3f7;
+  color: var(--accent);
 }
 .debug-btn.danger text {
-  color: #ef5350;
+  color: var(--red);
 }
 </style>
