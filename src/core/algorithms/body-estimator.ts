@@ -1,4 +1,4 @@
-import type { BodyProfile } from '../core/types/user'
+import type { BodyProfile } from '../types/user'
 
 /**
  * 基于身体数据估算初始1RM
