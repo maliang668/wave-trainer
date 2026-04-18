@@ -556,13 +556,22 @@ function resetToDefaultPlan() {
   trainingStore.generateTodayPlan()
 }
 
+// 标记是否需要重新生成计划（从其他页面返回时）
+let needRegeneratePlan = true
+
 // 生命周期
 onShow(() => {
-  trainingStore.generateTodayPlan()
+  // 仅在非训练状态且需要时重新生成（避免覆盖用户自定义动作）
+  if (needRegeneratePlan && !trainingStore.isTraining) {
+    trainingStore.generateTodayPlan()
+  }
+  needRegeneratePlan = true
 })
 
 // 监听动作选择器返回的事件
 uni.$on('exercisesSelected', (ids: string[]) => {
+  // 标记不需要重新生成，防止 onShow 覆盖
+  needRegeneratePlan = false
   onExercisesSelected(ids)
 })
 
