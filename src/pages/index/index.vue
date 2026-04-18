@@ -1,5 +1,10 @@
 <template>
   <view class="page">
+    <!-- 调试入口：快速点击3次或长按 -->
+    <view class="debug-trigger" @tap="onHeaderTap" @longpress="onLongPressHeader">
+      <text class="debug-trigger-text">训练</text>
+    </view>
+
     <!-- 非训练模式 -->
     <view v-if="!trainingStore.isTraining">
 
@@ -589,8 +594,21 @@ function focusRPE() { /* uni-app input focus */ }
 // 自定义计划
 const isCustomPlan = ref(false)
 const showDebugPanel = ref(false)
+let tapCount = 0
+let tapTimer: any = null
 
-// 长按标题区域打开调试面板
+// 快速点击标题区域3次打开调试面板
+function onHeaderTap() {
+  tapCount++
+  if (tapTimer) clearTimeout(tapTimer)
+  tapTimer = setTimeout(() => { tapCount = 0 }, 800)
+  if (tapCount >= 3) {
+    tapCount = 0
+    showDebugPanel.value = true
+  }
+}
+
+// 长按也可以打开
 function onLongPressHeader() {
   showDebugPanel.value = true
 }
@@ -706,6 +724,21 @@ onShow(() => {
 <style scoped>
 .page {
   padding-bottom: 120rpx;
+}
+.debug-trigger {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80rpx;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.debug-trigger-text {
+  font-size: 1rpx;
+  color: transparent;
 }
 
 /* 引导卡片 */
