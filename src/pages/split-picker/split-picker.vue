@@ -76,7 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { SPLIT_TEMPLATES, CUSTOM_TEMPLATE_STORAGE_KEY } from '../../core/constants/config'
 import { useTrainingStore } from '../../stores/training'
 import type { SplitTemplate } from '../../core/types/training'
@@ -84,20 +85,28 @@ import type { SplitTemplate } from '../../core/types/training'
 const trainingStore = useTrainingStore()
 const selectedId = ref(trainingStore.selectedTemplateId || '')
 
-// 合并预设模板和自定义方案
-const templates = computed(() => {
+// 模板列表（含自定义方案）
+const templates = ref<SplitTemplate[]>([...SPLIT_TEMPLATES])
+
+// 每次页面显示时重新加载（因为 localStorage 不是响应式的）
+function loadTemplates() {
   const list = [...SPLIT_TEMPLATES]
   try {
     const saved = uni.getStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY)
     if (saved) {
       const custom = JSON.parse(saved) as SplitTemplate
-      // 避免重复添加
       if (!list.find(t => t.id === custom.id)) {
         list.push(custom)
       }
     }
   } catch { /* ignore */ }
-  return list
+  templates.value = list
+  // 同步选中状态
+  selectedId.value = trainingStore.selectedTemplateId || ''
+}
+
+onShow(() => {
+  loadTemplates()
 })
 
 const levelLabels: Record<string, string> = {
