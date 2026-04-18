@@ -55,21 +55,28 @@
         <view v-if="trainingStore.todayPlan" class="exercise-list">
           <view class="section-title">今日训练</view>
           <view class="plan-actions">
-            <view class="btn-secondary btn-sm" @tap="openExercisePicker">
-              + 添加/替换动作
-            </view>
             <view class="btn-secondary btn-sm" @tap="resetToDefaultPlan" v-if="isCustomPlan">
               恢复默认
             </view>
           </view>
           <view
             v-for="(ex, index) in trainingStore.todayPlan.exercises"
-            :key="ex.exerciseId"
+            :key="ex.exerciseId + '-' + index"
             class="card exercise-card"
           >
             <view class="ex-header">
               <text class="ex-name">{{ ex.name }}</text>
-              <text class="ex-muscle">{{ MUSCLE_GROUP_NAMES[ex.muscleGroup] || ex.muscleGroup }}</text>
+              <view class="ex-header-right">
+                <text class="ex-muscle">{{ MUSCLE_GROUP_NAMES[ex.muscleGroup] || ex.muscleGroup }}</text>
+                <view class="ex-action-btns">
+                  <view class="ex-btn insert" @tap="insertExerciseAt(index)">
+                    <text>+</text>
+                  </view>
+                  <view class="ex-btn remove" @tap="removeExerciseAt(index)">
+                    <text>−</text>
+                  </view>
+                </view>
+              </view>
             </view>
             <view class="ex-details">
               <view class="ex-detail-item">
@@ -96,6 +103,11 @@
                 <text>{{ ws.weight }}kg × {{ ws.reps }}</text>
               </view>
             </view>
+          </view>
+
+          <!-- 底部添加动作按钮 -->
+          <view class="btn-secondary add-exercise-bottom" @tap="appendExercise">
+            + 添加其他动作
           </view>
         </view>
 
@@ -509,32 +521,54 @@ function focusRPE() { /* uni-app input focus */ }
 
 // 自定义计划
 const isCustomPlan = ref(false)
-const customExerciseIds = ref<string[]>([])
+const insertAtIndex = ref(-1) // -1 表示追加到末尾
 
-// 打开动作选择器
-function openExercisePicker() {
-  const currentIds = trainingStore.todayPlan
-    ? trainingStore.todayPlan.exercises.map(ex => ex.exerciseId)
-    : []
-  customExerciseIds.value = currentIds
+// 在指定位置后插入动作
+function insertExerciseAt(index: number) {
+  insertAtIndex.value = index
   uni.navigateTo({ url: '/pages/exercise-picker/exercise-picker' })
 }
 
-// 动作选择完成回调
-function onExercisesSelected(ids: string[]) {
-  customExerciseIds.value = ids
-  isCustomPlan.value = true
-  rebuildPlanWithExercises(ids)
+// 在末尾追加动作
+function appendExercise() {
+  insertAtIndex.value = -1
+  uni.navigateTo({ url: '/pages/exercise-picker/exercise-picker' })
 }
 
-// 用选定的动作重建训练计划
-function rebuildPlanWithExercises(exerciseIds: string[]) {
-  if (exerciseIds.length === 0) return
+// 删除指定位置的动作
+function removeExerciseAt(index: number) {
+  if (!trainingStore.todayPlan) return
+  const currentExercises = trainingStore.todayPlan.exercises.map(ex => ({
+    exerciseId: ex.exerciseId,
+    sets: ex.sets,
+    repsRange: ex.targetReps,
+    rpeTarget: ex.targetRPE,
+    percent1RM: 0.75, // 保留原值不影响
+  }))
+  currentExercises.splice(index, 1)
+  isCustomPlan.value = true
+  rebuildPlanWithExercises(currentExercises)
+}
 
+// 动作选择完成回调（从全局变量读取）
+function onExercisesSelected(ids: string[]) {
+  if (!ids || ids.length === 0) return
+  isCustomPlan.value = true
+
+  // 获取当前计划中的动作配置
+  const currentExercises = trainingStore.todayPlan
+    ? trainingStore.todayPlan.exercises.map(ex => ({
+        exerciseId: ex.exerciseId,
+        sets: ex.sets,
+        repsRange: ex.targetReps,
+        rpeTarget: ex.targetRPE,
+        percent1RM: 0.75,
+      }))
+    : []
+
+  // 为新选择的动作生成配置
   const exerciseStoreLocal = useExerciseStore()
-  const userStoreLocal = useUserStore()
-
-  const exercises = exerciseIds.map(id => {
+  const newExercises = ids.map(id => {
     const ex = exerciseStoreLocal.getExercise(id)
     const isCompound = ex?.category === 'compound'
     return {
@@ -546,13 +580,36 @@ function rebuildPlanWithExercises(exerciseIds: string[]) {
     }
   })
 
+  // 根据插入位置合并
+  let mergedExercises: any[]
+  if (insertAtIndex.value >= 0 && insertAtIndex.value < currentExercises.length) {
+    // 在指定位置后插入
+    mergedExercises = [
+      ...currentExercises.slice(0, insertAtIndex.value + 1),
+      ...newExercises,
+      ...currentExercises.slice(insertAtIndex.value + 1),
+    ]
+  } else {
+    // 追加到末尾
+    mergedExercises = [...currentExercises, ...newExercises]
+  }
+
+  rebuildPlanWithExercises(mergedExercises)
+}
+
+// 用动作配置列表重建训练计划
+function rebuildPlanWithExercises(exercises: any[]) {
+  if (exercises.length === 0) {
+    trainingStore.generateTodayPlan()
+    return
+  }
   trainingStore.updateDayExercises(exercises)
 }
 
 // 恢复默认计划
 function resetToDefaultPlan() {
   isCustomPlan.value = false
-  customExerciseIds.value = []
+  insertAtIndex.value = -1
   trainingStore.generateTodayPlan()
 }
 
@@ -696,12 +753,49 @@ onShow(() => {
   font-size: 32rpx;
   font-weight: 600;
 }
+.ex-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
 .ex-muscle {
   font-size: 22rpx;
   color: #888;
   background: #2a2a4a;
   padding: 4rpx 12rpx;
   border-radius: 6rpx;
+}
+.ex-action-btns {
+  display: flex;
+  gap: 8rpx;
+}
+.ex-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.ex-btn.insert {
+  background: rgba(79, 195, 247, 0.15);
+  color: #4fc3f7;
+}
+.ex-btn.remove {
+  background: rgba(239, 83, 80, 0.15);
+  color: #ef5350;
+}
+.add-exercise-bottom {
+  width: 100%;
+  padding: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  margin-top: 16rpx;
+  border: 2rpx dashed #3a3a5a;
+  color: #4fc3f7;
 }
 .ex-details {
   display: flex;
