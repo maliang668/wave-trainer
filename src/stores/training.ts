@@ -10,11 +10,11 @@ import { evaluateDeloadNeed } from '../core/algorithms/deload-detector'
 import { detectPlateau } from '../core/algorithms/plateau-detector'
 import { generateReturnPlan } from '../core/algorithms/return-planner'
 import { assessFatigue } from '../core/algorithms/fatigue-assessor'
+import { estimateAllInitial1RMs } from '../core/algorithms/index'
 import { formatDate, daysBetween } from '../utils/format'
 import { useExerciseStore } from './exercise'
 import type { Exercise } from '../core/types/exercise'
 import { SPLIT_TEMPLATES, DEFAULT_WEIGHTS, CUSTOM_TEMPLATE_STORAGE_KEY } from '../core/constants/config'
-import { estimateAllInitial1RMs } from '../core/algorithms/body-estimator'
 
 // 延迟获取 userStore，避免循环依赖
 function getUserStore() {
