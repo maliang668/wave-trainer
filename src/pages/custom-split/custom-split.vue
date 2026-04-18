@@ -169,7 +169,10 @@ function moveDay(index: number, direction: number) {
 }
 
 function saveTemplate() {
-  if (!canSave.value) return
+  if (!canSave.value) {
+    uni.showToast({ title: '请至少添加2天日程（含1个训练日）', icon: 'none' })
+    return
+  }
 
   const customTemplate: SplitTemplate = {
     id: 'custom',
@@ -178,20 +181,31 @@ function saveTemplate() {
     level: 'intermediate',
     daysPerWeek: trainingDayCount.value,
     cycleDays: cycleDays.value.length,
-    days: [...cycleDays.value],
+    days: JSON.parse(JSON.stringify(cycleDays.value)),
     isCustom: true,
   }
 
-  // 保存到本地存储
-  uni.setStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY, JSON.stringify(customTemplate))
+  try {
+    // 保存到本地存储
+    uni.setStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY, JSON.stringify(customTemplate))
+    console.log('[custom-split] 模板已保存到 localStorage')
 
-  // 选择该模板
-  trainingStore.selectTemplate('custom')
+    // 验证保存是否成功
+    const saved = uni.getStorageSync(CUSTOM_TEMPLATE_STORAGE_KEY)
+    console.log('[custom-split] 验证读取:', saved ? '成功' : '失败')
 
-  uni.showToast({ title: '自定义方案已保存！', icon: 'success' })
-  setTimeout(() => {
-    uni.navigateBack()
-  }, 500)
+    // 选择该模板
+    trainingStore.selectTemplate('custom')
+    console.log('[custom-split] selectTemplate 已调用')
+
+    uni.showToast({ title: '自定义方案已保存！', icon: 'success' })
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 500)
+  } catch (e) {
+    console.error('[custom-split] 保存失败:', e)
+    uni.showToast({ title: '保存失败，请重试', icon: 'none' })
+  }
 }
 
 // 加载已保存的自定义模板

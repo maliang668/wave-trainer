@@ -88,6 +88,7 @@
               <view class="ex-detail-item">
                 <text class="detail-label">重量</text>
                 <text class="detail-value text-primary">{{ ex.suggestedWeight }}kg</text>
+                <text class="detail-hint" v-if="ex.suggestedWeight > 20">含杠铃</text>
               </view>
               <view class="ex-detail-item">
                 <text class="detail-label">组数</text>
@@ -875,6 +876,12 @@ onShow(() => {
 .detail-value {
   font-size: 30rpx;
   font-weight: 600;
+}
+.detail-hint {
+  display: block;
+  font-size: 18rpx;
+  color: #666;
+  margin-top: 2rpx;
 }
 .warmup-section {
   margin-top: 16rpx;
